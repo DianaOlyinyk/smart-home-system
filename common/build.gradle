@@ -1,7 +1,13 @@
 plugins {
     id 'java-library'
+	id 'org.springframework.boot' version '4.1.1'
+	id 'io.spring.dependency-management' version '1.1.6'
 }
+
+tasks.named('bootJar') { enabled = false }
 
 dependencies {
     // сюди підуть спільні DTO/enum для REST і WebSocket протоколу
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 }
