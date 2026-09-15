@@ -36,4 +36,5 @@ out/
 application-local.yml
 application-local.yaml
 
-.vscode 
+.vscode
+gradle.properties 

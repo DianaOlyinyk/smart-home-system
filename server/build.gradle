@@ -17,9 +17,20 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.modulith:spring-modulith-starter-core'
+    implementation 'com.networknt:json-schema-validator:3.0.7'
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-webmvc-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
+}
+
+tasks.withType(Test).configureEach {
+    def shortTmpDir = System.getenv('TEMP') ?: System.getenv('TMP')
+    if (shortTmpDir != null) {
+        systemProperty 'java.io.tmpdir', shortTmpDir
+    }
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        jvmArgs '-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.WindowsSelectorProvider'
+    }
 }

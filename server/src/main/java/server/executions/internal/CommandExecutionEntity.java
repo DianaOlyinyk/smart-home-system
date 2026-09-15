@@ -1,3 +1,5 @@
+package server.executions.internal;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
@@ -5,16 +7,16 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-public class CommandExecution {
+class CommandExecutionEntity {
     @Id
     UUID id;
-    UUID commandId;
+
     UUID deviceId;
+    UUID commandId;
     UUID executedById;
-    String[] args;
+    String argsJson;
     String status;
     String result;
     Instant requestedAt;
     Instant completedAt;
 }
-
