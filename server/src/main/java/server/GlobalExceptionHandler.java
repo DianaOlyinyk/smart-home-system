@@ -7,6 +7,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import server.auth.InvalidCredentialsException;
+import server.commands.CommandNotFoundException;
+import server.executions.InvalidCommandArgsException;
 import server.users.EmailAlreadyRegisteredException;
 import server.users.UserNotFoundException;
 
@@ -31,6 +33,20 @@ class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     ProblemDetail handleUnauthorized(InvalidCredentialsException ex) {
         return problemDetail(HttpStatus.UNAUTHORIZED, "Невірні облікові дані", ex.getMessage());
+    }
+
+    @ExceptionHandler(CommandNotFoundException.class)
+    ProblemDetail handleCommandNotFound(CommandNotFoundException ex) {
+        return problemDetail(HttpStatus.NOT_FOUND, "Команду не знайдено", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCommandArgsException.class)
+    ProblemDetail handleInvalidCommandArgs(InvalidCommandArgsException ex) {
+        ProblemDetail problemDetail = problemDetail(HttpStatus.BAD_REQUEST, "Некоректні аргументи команди", ex.getMessage());
+        if (!ex.getErrors().isEmpty()) {
+            problemDetail.setProperty("errors", ex.getErrors());
+        }
+        return problemDetail;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
