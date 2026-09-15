@@ -16,6 +16,7 @@ import server.commands.CommandNotFoundException;
 import server.executions.InvalidCommandArgsException;
 import server.users.EmailAlreadyRegisteredException;
 import server.users.UserNotFoundException;
+import server.devices.DeviceNotFoundException;
 
 import org.springframework.validation.FieldError;
 
@@ -30,6 +31,11 @@ class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     ProblemDetail handleNotFound(UserNotFoundException ex) {
         return problemDetail(HttpStatus.NOT_FOUND, "Користувача не знайдено", ex.getMessage(), ex);
+    }
+
+    @ExceptionHandler(DeviceNotFoundException.class)
+    ProblemDetail handleDeviceNotFound(DeviceNotFoundException ex) {
+        return problemDetail(HttpStatus.NOT_FOUND, "Пристрій не знайдено", ex.getMessage(), ex);
     }
 
     @ExceptionHandler(EmailAlreadyRegisteredException.class)
