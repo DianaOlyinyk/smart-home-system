@@ -7,7 +7,7 @@ public record Command(
     UUID id,
     UUID deviceId,
     String name,
-    Map<String, String> argsSchema,
+    String argsSchema,
     RequiredRole requiredRole,
     Instant createdAt) {
 }

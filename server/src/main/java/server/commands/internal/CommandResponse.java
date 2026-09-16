@@ -6,7 +6,7 @@ import java.util.UUID;
 
 record CommandResponse(
     UUID id, UUID deviceId, String name,
-    Map<String, String> argsSchema, String requiredRole, Instant createdAt) {
+    String argsSchema, String requiredRole, Instant createdAt) {
         static CommandResponse from(Command command) {
             return new CommandResponse(
                 command.id(), command.deviceId(), command.name(),
