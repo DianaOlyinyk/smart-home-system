@@ -7,6 +7,10 @@
     - Написано тести взаємодії (MockMvc) для auth, users, executions
 - Олійник Діана:
 - Забіяка Денис:
+    - Реалізував REST-ендпоінт `POST /devices` для додавання нового розумного пристрою в систему
+    - Створив DTO-контракти (`CreateDeviceRequest`, `DeviceResponse`) на базі Java Records
+    - Налаштував Jakarta Validation (`@NotBlank`, `@NotNull`) — перевірка непорожньої назви та відповідності типу enum `DeviceType` (LAMP, KETTLE, AC, COFFEE_MACHINE, BLINDS)
+    - Написав тести взаємодії (MockMvc): успішне створення (201 Created + заголовок `Location`) та чотири сценарії валідації (400 Bad Request)
 - Мошенський Олег:
     - Реалізував REST-ендпоінт `POST /devices/{deviceId}/commands` для додавання нових команд до пристрою
     - Створив DTO-контракти (`CreateCommandRequest`, `CommandResponse`) на базі Java Records
