@@ -6,6 +6,7 @@
     - Розширено глобальний обробник помилок (`GlobalExceptionHandler`) — catch-all для 400/404/405/500 та єдиний формат `ProblemDetail`
     - Написано тести взаємодії (MockMvc) для auth, users, executions
 - Олійник Діана:
+    - Допомога з реалізацією `devices`, DTO-контрактів, написання тестів
 - Забіяка Денис:
     - Реалізував REST-ендпоінт `POST /devices` для додавання нового розумного пристрою в систему
     - Створив DTO-контракти (`CreateDeviceRequest`, `DeviceResponse`) на базі Java Records
