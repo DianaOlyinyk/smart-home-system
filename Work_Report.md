@@ -1,0 +1,19 @@
+# Звіт про виконання Групового завдання 2
+- Малій Олександра:
+    - Реалізовано контролер сутності User, що дозволяє реєструвати користувача та отримувати профіль за id, та авторизація у TokenController
+    - Реалізовано ендпоінт виконання команди на пристрої (`POST /devices/{deviceId}/commands/{commandId}/executions`)
+    - Додано валідацію DTO-сутностей, зокрема кастомна валідація аргументів команди проти JSON Schema (бібліотека json-schema-validator)
+    - Розширено глобальний обробник помилок (`GlobalExceptionHandler`) — catch-all для 400/404/405/500 та єдиний формат `ProblemDetail`
+    - Написано тести взаємодії (MockMvc) для auth, users, executions
+- Олійник Діана:
+    - Допомога з реалізацією `devices`, DTO-контрактів, написання тестів
+- Забіяка Денис:
+    - Реалізував REST-ендпоінт `POST /devices` для додавання нового розумного пристрою в систему
+    - Створив DTO-контракти (`CreateDeviceRequest`, `DeviceResponse`) на базі Java Records
+    - Налаштував Jakarta Validation (`@NotBlank`, `@NotNull`) — перевірка непорожньої назви та відповідності типу enum `DeviceType` (LAMP, KETTLE, AC, COFFEE_MACHINE, BLINDS)
+    - Написав тести взаємодії (MockMvc): успішне створення (201 Created + заголовок `Location`) та чотири сценарії валідації (400 Bad Request)
+- Мошенський Олег:
+    - Реалізував REST-ендпоінт `POST /devices/{deviceId}/commands` для додавання нових команд до пристрою
+    - Створив DTO-контракти (`CreateCommandRequest`, `CommandResponse`) на базі Java Records
+    - Налаштував Jakarta Validation (`@NotBlank`, `@NotNull`) для перевірки вхідних даних на рівні контролера
+    - Написав тести для веб-шару через MockMvc, повністю покривши успішний сценарій (201 Created) та помилки валідації/відсутності ресурсу (400, 404)

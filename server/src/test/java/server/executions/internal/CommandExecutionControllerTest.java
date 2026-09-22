@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import server.commands.Command;
 import server.commands.CommandNotFoundException;
 import server.commands.CommandService;
+import server.commands.RequiredRole;
 import server.executions.CommandExecution;
 import server.executions.CommandExecutionService;
 
@@ -56,7 +57,7 @@ class CommandExecutionControllerTest {
         Instant requestedAt = Instant.parse("2026-01-01T00:00:00Z");
 
         when(commandService.findByDeviceIdAndCommandId(deviceId, commandId))
-                .thenReturn(new Command(commandId, deviceId, "setBrightness", BRIGHTNESS_SCHEMA, "OWNER", requestedAt));
+                .thenReturn(new Command(commandId, deviceId, "setBrightness", BRIGHTNESS_SCHEMA, RequiredRole.OWNER, requestedAt));
         when(commandExecutionService.execute(eq(deviceId), eq(commandId), anyString()))
                 .thenReturn(new CommandExecution(executionId, deviceId, commandId, "{\"brightness\":80}", "PENDING", requestedAt));
 
@@ -135,7 +136,7 @@ class CommandExecutionControllerTest {
         UUID commandId = UUID.randomUUID();
 
         when(commandService.findByDeviceIdAndCommandId(deviceId, commandId))
-                .thenReturn(new Command(commandId, deviceId, "setBrightness", BRIGHTNESS_SCHEMA, "OWNER", Instant.now()));
+                .thenReturn(new Command(commandId, deviceId, "setBrightness", BRIGHTNESS_SCHEMA, RequiredRole.OWNER, Instant.now()));
 
         mockMvc.perform(post("/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -155,7 +156,7 @@ class CommandExecutionControllerTest {
         UUID commandId = UUID.randomUUID();
 
         when(commandService.findByDeviceIdAndCommandId(deviceId, commandId))
-                .thenReturn(new Command(commandId, deviceId, "setBrightness", BRIGHTNESS_SCHEMA, "OWNER", Instant.now()));
+                .thenReturn(new Command(commandId, deviceId, "setBrightness", BRIGHTNESS_SCHEMA, RequiredRole.OWNER, Instant.now()));
 
         mockMvc.perform(post("/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -175,7 +176,7 @@ class CommandExecutionControllerTest {
         UUID commandId = UUID.randomUUID();
 
         when(commandService.findByDeviceIdAndCommandId(deviceId, commandId))
-                .thenReturn(new Command(commandId, deviceId, "setBrightness", BRIGHTNESS_SCHEMA, "OWNER", Instant.now()));
+                .thenReturn(new Command(commandId, deviceId, "setBrightness", BRIGHTNESS_SCHEMA, RequiredRole.OWNER, Instant.now()));
 
         mockMvc.perform(post("/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
                         .contentType(MediaType.APPLICATION_JSON)

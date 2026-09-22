@@ -14,7 +14,6 @@ import server.devices.DeviceType;
 import java.time.Instant;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -35,24 +34,24 @@ class DeviceControllerTest {
     @Test
     void createDeviceReturns201WithLocationAndBody() throws Exception {
         UUID id = UUID.randomUUID();
-        when(deviceService.create(anyString(), eq(DeviceType.LAMP)))
-                .thenReturn(new Device(id, "Living room lamp", DeviceType.LAMP,
-                        "connection-token", Instant.parse("2026-01-01T00:00:00Z")));
+        Instant now = Instant.parse("2026-01-01T00:00:00Z");
+        when(deviceService.create(eq("Лампа"), eq(DeviceType.LAMP)))
+                .thenReturn(new Device(id, "Лампа", DeviceType.LAMP, "token-123", now));
 
         mockMvc.perform(post("/devices")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "name": "Living room lamp",
+                                  "name": "Лампа",
                                   "type": "LAMP"
                                 }
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/devices/" + id))
                 .andExpect(jsonPath("$.id").value(id.toString()))
-                .andExpect(jsonPath("$.name").value("Living room lamp"))
+                .andExpect(jsonPath("$.name").value("Лампа"))
                 .andExpect(jsonPath("$.type").value("LAMP"))
-                .andExpect(jsonPath("$.connectionToken").value("connection-token"));
+                .andExpect(jsonPath("$.connectionToken").value("token-123"));
     }
 
     @Test
@@ -62,7 +61,7 @@ class DeviceControllerTest {
                         .content("""
                                 {
                                   "name": "",
-                                  "type": "KETTLE"
+                                  "type": "LAMP"
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
@@ -74,8 +73,33 @@ class DeviceControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "name": "Living room device",
+                                  "name": "Лампа",
                                   "type": "TOASTER"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createDeviceReturns400WhenNameIsWhitespaceOnly() throws Exception {
+        mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "   ",
+                                  "type": "LAMP"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createDeviceReturns400WhenTypeIsMissing() throws Exception {
+        mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "Лампа"
                                 }
                                 """))
                 .andExpect(status().isBadRequest());

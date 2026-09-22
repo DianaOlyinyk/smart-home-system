@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import server.devices.DeviceType;
 
 record CreateDeviceRequest(
-        @NotBlank String name,
-        @NotNull DeviceType type) {
+    @NotBlank(message = "Назва пристрою є обов'язковою")
+    String name,
+
+    @NotNull(message = "Тип пристрою є обов'язковим")
+    DeviceType type) {
 }
