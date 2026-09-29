@@ -6,9 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.util.ReflectionTestUtils;
 import server.commands.Command;
 import server.commands.CommandService;
 import server.commands.RequiredRole;
+import server.devices.Device;
+import server.devices.DeviceType;
 import server.executions.CommandExecutedEvent;
 import server.executions.CommandExecution;
 import server.executions.CommandExecutionRepository;
@@ -23,6 +26,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -48,14 +53,26 @@ class CommandExecutionServiceImplTest {
 
     private final UUID deviceId = UUID.randomUUID();
     private final UUID commandId = UUID.randomUUID();
-    private final Command command = new Command(
-            commandId, deviceId, "set_brightness", "{}", RequiredRole.OWNER, Instant.now());
+    private final Device device = withId(new Device("Лампа", DeviceType.LAMP, "token", Instant.now()), deviceId);
+    private final Command command = withId(
+            new Command(device, "set_brightness", "{}", RequiredRole.OWNER, Instant.now()), commandId);
     private final Map<String, Object> args = Map.of("brightness", 80);
 
     @BeforeEach
     void setUp() {
         org.mockito.Mockito.lenient().when(commandExecutionRepository.save(any()))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+                .thenAnswer(invocation -> {
+                    CommandExecution execution = invocation.getArgument(0);
+                    if (execution.getId() == null) {
+                        withId(execution, UUID.randomUUID());
+                    }
+                    return execution;
+                });
+    }
+
+    private static <T> T withId(T entity, UUID id) {
+        ReflectionTestUtils.setField(entity, "id", id);
+        return entity;
     }
 
     @Test
@@ -73,10 +90,15 @@ class CommandExecutionServiceImplTest {
 
         CommandExecution execution = service.execute(deviceId, commandId, args);
 
-        assertEquals(ExecutionStatus.SUCCESS, execution.status());
-        verify(commandArgsValidator).validate(command.argsSchema(), args);
+        assertEquals(ExecutionStatus.SUCCESS, execution.getStatus());
+        assertNotNull(execution.getId());
+        assertNotNull(execution.getCompletedAt());
+        assertSame(command, execution.getCommand());
+        assertSame(device, execution.getDevice());
+        assertEquals(args, execution.getArgs());
+        verify(commandArgsValidator).validate(command.getArgsSchema(), args);
         verify(commandExecutionRepository, org.mockito.Mockito.times(2)).save(any());
-        verify(eventPublisher).publishEvent(new CommandExecutedEvent(execution.id(), ExecutionStatus.SUCCESS));
+        verify(eventPublisher).publishEvent(new CommandExecutedEvent(execution.getId(), ExecutionStatus.SUCCESS));
     }
 
     @Test
@@ -94,8 +116,8 @@ class CommandExecutionServiceImplTest {
 
         CommandExecution execution = service.execute(deviceId, commandId, args);
 
-        assertEquals(ExecutionStatus.FAILED, execution.status());
-        verify(eventPublisher).publishEvent(new CommandExecutedEvent(execution.id(), ExecutionStatus.FAILED));
+        assertEquals(ExecutionStatus.FAILED, execution.getStatus());
+        verify(eventPublisher).publishEvent(new CommandExecutedEvent(execution.getId(), ExecutionStatus.FAILED));
     }
 
     @Test

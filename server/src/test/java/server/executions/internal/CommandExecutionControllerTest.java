@@ -6,11 +6,15 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import server.commands.Command;
 import server.commands.CommandNotFoundException;
+import server.commands.RequiredRole;
+import server.devices.Device;
+import server.devices.DeviceType;
 import server.executions.CommandExecution;
 import server.executions.CommandExecutionService;
-import server.executions.ExecutionStatus;
 
 import java.time.Instant;
 import java.util.Map;
@@ -34,6 +38,17 @@ class CommandExecutionControllerTest {
     @MockitoBean
     private CommandExecutionService commandExecutionService;
 
+    private static CommandExecution pendingExecution(
+            UUID executionId, UUID deviceId, UUID commandId, Map<String, Object> args, Instant requestedAt) {
+        Device device = new Device("Лампа", DeviceType.LAMP, "token", requestedAt);
+        ReflectionTestUtils.setField(device, "id", deviceId);
+        Command command = new Command(device, "set_brightness", "{}", RequiredRole.GUEST, requestedAt);
+        ReflectionTestUtils.setField(command, "id", commandId);
+        CommandExecution execution = new CommandExecution(command, device, null, args, requestedAt);
+        ReflectionTestUtils.setField(execution, "id", executionId);
+        return execution;
+    }
+
     @Test
     void executeCommandReturns202WithLocationAndBody() throws Exception {
         UUID deviceId = UUID.randomUUID();
@@ -42,8 +57,7 @@ class CommandExecutionControllerTest {
         Instant requestedAt = Instant.parse("2026-01-01T00:00:00Z");
 
         when(commandExecutionService.execute(eq(deviceId), eq(commandId), anyMap()))
-                .thenReturn(new CommandExecution(
-                        executionId, deviceId, commandId, Map.of("brightness", 80), ExecutionStatus.PENDING, requestedAt));
+                .thenReturn(pendingExecution(executionId, deviceId, commandId, Map.of("brightness", 80), requestedAt));
 
         mockMvc.perform(post("/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -91,8 +105,7 @@ class CommandExecutionControllerTest {
         Instant requestedAt = Instant.parse("2026-01-01T00:00:00Z");
 
         when(commandExecutionService.execute(eq(deviceId), eq(commandId), eq(Map.of())))
-                .thenReturn(new CommandExecution(
-                        executionId, deviceId, commandId, Map.of(), ExecutionStatus.PENDING, requestedAt));
+                .thenReturn(pendingExecution(executionId, deviceId, commandId, Map.of(), requestedAt));
 
         mockMvc.perform(post("/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
                         .contentType(MediaType.APPLICATION_JSON)
