@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -35,8 +36,14 @@ class DeviceControllerTest {
     void createDeviceReturns201WithLocationAndBody() throws Exception {
         UUID id = UUID.randomUUID();
         Instant now = Instant.parse("2026-01-01T00:00:00Z");
+        Device device = mock(Device.class);
+        when(device.getId()).thenReturn(id);
+        when(device.getName()).thenReturn("Лампа");
+        when(device.getType()).thenReturn(DeviceType.LAMP);
+        when(device.getConnectionToken()).thenReturn("token-123");
+        when(device.getCreatedAt()).thenReturn(now);
         when(deviceService.create(eq("Лампа"), eq(DeviceType.LAMP)))
-                .thenReturn(new Device(id, "Лампа", DeviceType.LAMP, "token-123", now));
+          .thenReturn(device);
 
         mockMvc.perform(post("/devices")
                         .contentType(MediaType.APPLICATION_JSON)

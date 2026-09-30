@@ -19,12 +19,15 @@ dependencies {
     implementation 'org.springframework.modulith:spring-modulith-starter-core'
     implementation 'com.networknt:json-schema-validator:3.0.7'
     runtimeOnly 'org.postgresql:postgresql'
+    testImplementation 'com.h2database:h2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-webmvc-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
     testImplementation 'com.tngtech.archunit:archunit-junit5:1.5.0'
     implementation 'org.springframework.modulith:spring-modulith-events-api'
+
 }
 
 tasks.withType(Test).configureEach {
