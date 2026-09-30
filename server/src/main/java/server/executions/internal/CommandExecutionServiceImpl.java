@@ -8,7 +8,7 @@ import server.commands.CommandService;
 import server.devices.DeviceService;
 import server.executions.CommandExecutedEvent;
 import server.executions.CommandExecution;
-import server.executions.CommandExecutionNotFoundException;
+import server.devices.CommandExecutionNotFoundException;
 import server.executions.CommandExecutionRepository;
 import server.executions.CommandExecutionService;
 import server.executions.CommandExecutionStrategy;
@@ -102,6 +102,6 @@ class CommandExecutionServiceImpl implements CommandExecutionService {
 
     private CommandExecution getExecution(UUID deviceId, UUID executionId) {
         return commandExecutionRepository.findByIdAndDeviceId(executionId, deviceId)
-                .orElseThrow(() -> new CommandExecutionNotFoundException(deviceId, executionId));
+                .orElseThrow(() -> new CommandExecutionNotFoundException(executionId));
     }
 }

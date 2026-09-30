@@ -16,7 +16,7 @@ import server.devices.DeviceService;
 import server.devices.DeviceType;
 import server.executions.CommandExecutedEvent;
 import server.executions.CommandExecution;
-import server.executions.CommandExecutionNotFoundException;
+import server.devices.CommandExecutionNotFoundException;
 import server.executions.CommandExecutionRepository;
 import server.executions.CommandExecutionStrategy;
 import server.executions.ExecutionOutcome;

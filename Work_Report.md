@@ -46,3 +46,15 @@
 - Мошенський Олег:
     - Додав окремий пакет server.audit з класом CommandExecutionAuditListener — @component, публічний клас і метод, що слухає CommandExecutedEvent (публічний тип із server.executions) через анотацію @ApplicationModuleListener і пише запис у лог застосунку через SLF4J: id виконання команди та фінальний статус. Модуль audit лише імпортує подію й нічого не знає про внутрішню логіку виконання команди — зв'язок відбувається виключно через подію, без прямої залежності між модулями.
     - Реалізував UserService.register(email, rawPassword, name) та findById(id), а також AuthService.login(email, rawPassword). Додав UserRepository (інтерфейс: save, findById, findByEmail, existsByEmail) і UserRepositoryImpl — мінімальна реалізація на ConcurrentHashMap, без реальної БД. Конструкторна ін'єкція UserRepository в сервіс.
+ 
+# Звіт за 4 групове завдання
+- Олег Мошенський:
+	- Реалізував CRUD-операції для користувачів та пошук за email/запитом.
+	- Додав `DeviceAccessService` і `DeviceAccessController` для надання, відкликання та перегляду доступів до пристроїв.
+	- Налаштував H2 та JPA для роботи з базою даних і тестування.
+	- Переніс `User` у серверний модуль та створив відповідний JPA Repository.
+ 	- Додав необхідні винятки та обробку помилок `404` і `409`.
+	- Додав та оновив тести для перевірки роботи репозиторіїв, доступів, cascade та `orphanRemoval`.
+	-	Вирішив конфлікти під час об'єднання змін із `main` та перевірив збірку проєкту.
+
+	

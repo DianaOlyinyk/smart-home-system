@@ -15,7 +15,7 @@ import server.devices.Device;
 import server.devices.DeviceNotFoundException;
 import server.devices.DeviceType;
 import server.executions.CommandExecution;
-import server.executions.CommandExecutionNotFoundException;
+import server.devices.CommandExecutionNotFoundException;
 import server.executions.CommandExecutionService;
 import server.executions.ExecutionStatus;
 import server.executions.InvalidStateTransitionException;
@@ -217,7 +217,7 @@ class CommandExecutionControllerTest {
     @Test
     void getByIdReturns404WhenExecutionNotFound() throws Exception {
         when(commandExecutionService.findById(deviceId, executionId))
-                .thenThrow(new CommandExecutionNotFoundException(deviceId, executionId));
+                .thenThrow(new CommandExecutionNotFoundException(executionId));
 
         mockMvc.perform(get("/devices/{deviceId}/executions/{executionId}", deviceId, executionId))
                 .andExpect(status().isNotFound());
@@ -275,7 +275,7 @@ class CommandExecutionControllerTest {
     @Test
     void changeStatusReturns404WhenExecutionNotFound() throws Exception {
         when(commandExecutionService.changeStatus(deviceId, executionId, ExecutionStatus.TIMEOUT))
-                .thenThrow(new CommandExecutionNotFoundException(deviceId, executionId));
+                .thenThrow(new CommandExecutionNotFoundException(executionId));
 
         mockMvc.perform(patch("/devices/{deviceId}/executions/{executionId}", deviceId, executionId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -295,7 +295,7 @@ class CommandExecutionControllerTest {
 
     @Test
     void deleteReturns404WhenExecutionNotFound() throws Exception {
-        doThrow(new CommandExecutionNotFoundException(deviceId, executionId))
+        doThrow(new CommandExecutionNotFoundException(executionId))
                 .when(commandExecutionService).delete(deviceId, executionId);
 
         mockMvc.perform(delete("/devices/{deviceId}/executions/{executionId}", deviceId, executionId))

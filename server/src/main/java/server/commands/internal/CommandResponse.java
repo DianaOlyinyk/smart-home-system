@@ -8,7 +8,7 @@ record CommandResponse(
     String argsSchema, String requiredRole, Instant createdAt) {
         static CommandResponse from(Command command) {
             return new CommandResponse(
-                command.id(), command.deviceId(), command.name(),
-                command.argsSchema(), command.requiredRole().name(), command.createdAt());
+                command.getId(), command.getDevice().getId(), command.getName(),
+                command.getArgsSchema(), command.getRequiredRole().name(), command.getCreatedAt());
     }
 }
