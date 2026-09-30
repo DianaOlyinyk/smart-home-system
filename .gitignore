@@ -38,3 +38,4 @@ application-local.yaml
 
 .vscode
 gradle.properties 
+bin/

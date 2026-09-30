@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import server.users.EmailAlreadyRegisteredException;
 import server.users.UserAccount;
 import server.users.UserNotFoundException;
+import server.users.User;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -57,11 +58,7 @@ class UserServiceImplTest {
     @Test
     void test03() {
         UUID id = UUID.randomUUID();
-        User user = new User();
-        user.id = id;
-        user.email = "olena@example.com";
-        user.name = "Олена";
-        user.createdAt = Instant.now();
+        User user = new User(id, "olena@example.com", "HASHED", "Олена", Instant.now());
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
         UserAccount account = userService.findById(id);
         assertEquals(id, account.id());
@@ -77,12 +74,7 @@ class UserServiceImplTest {
 
     @Test
     void test05() {
-        User user = new User();
-        user.id = UUID.randomUUID();
-        user.email = "olena@example.com";
-        user.passwordHash = "HASHED";
-        user.name = "Олена";
-        user.createdAt = Instant.now();
+        User user = new User(UUID.randomUUID(), "olena@example.com", "HASHED", "Олена", Instant.now());
         when(userRepository.findByEmail("olena@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("qwerty123", "HASHED")).thenReturn(true);
         Optional<UserAccount> account = userService.authenticate("olena@example.com", "qwerty123");
@@ -92,10 +84,7 @@ class UserServiceImplTest {
 
     @Test
     void test06() {
-        User user = new User();
-        user.id = UUID.randomUUID();
-        user.email = "olena@example.com";
-        user.passwordHash = "HASHED";
+        User user = new User(UUID.randomUUID(), "olena@example.com", "HASHED", "Олена", Instant.now());
         when(userRepository.findByEmail("olena@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong", "HASHED")).thenReturn(false);
         Optional<UserAccount> account = userService.authenticate("olena@example.com", "wrong");
