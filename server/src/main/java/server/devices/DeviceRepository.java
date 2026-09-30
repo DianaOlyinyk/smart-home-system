@@ -1,11 +1,6 @@
 package server.devices;
-
-import java.util.Optional;
+import org.springframework.data.repository.ListCrudRepository;
 import java.util.UUID;
 
-public interface DeviceRepository {
-
-    Device save(Device device);
-
-    Optional<Device> findById(UUID id);
+public interface DeviceRepository extends ListCrudRepository<Device, UUID> {
 }

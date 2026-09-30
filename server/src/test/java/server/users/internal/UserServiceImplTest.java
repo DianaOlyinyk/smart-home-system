@@ -5,7 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 import server.users.EmailAlreadyRegisteredException;
+import server.users.User;
 import server.users.UserAccount;
 import server.users.UserNotFoundException;
 import java.time.Instant;
@@ -22,11 +24,13 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
+
     @Mock
     private UserRepository userRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
     private UserServiceImpl userService;
 
     @BeforeEach
@@ -57,11 +61,8 @@ class UserServiceImplTest {
     @Test
     void test03() {
         UUID id = UUID.randomUUID();
-        User user = new User();
-        user.id = id;
-        user.email = "olena@example.com";
-        user.name = "Олена";
-        user.createdAt = Instant.now();
+        User user = new User("olena@example.com", "HASHED", "Олена", Instant.now());
+        ReflectionTestUtils.setField(user, "id", id);
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
         UserAccount account = userService.findById(id);
         assertEquals(id, account.id());
@@ -77,12 +78,8 @@ class UserServiceImplTest {
 
     @Test
     void test05() {
-        User user = new User();
-        user.id = UUID.randomUUID();
-        user.email = "olena@example.com";
-        user.passwordHash = "HASHED";
-        user.name = "Олена";
-        user.createdAt = Instant.now();
+        User user = new User("olena@example.com", "HASHED", "Олена", Instant.now());
+        ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
         when(userRepository.findByEmail("olena@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("qwerty123", "HASHED")).thenReturn(true);
         Optional<UserAccount> account = userService.authenticate("olena@example.com", "qwerty123");
@@ -92,10 +89,8 @@ class UserServiceImplTest {
 
     @Test
     void test06() {
-        User user = new User();
-        user.id = UUID.randomUUID();
-        user.email = "olena@example.com";
-        user.passwordHash = "HASHED";
+        User user = new User("olena@example.com", "HASHED", "Олена", Instant.now());
+        ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
         when(userRepository.findByEmail("olena@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong", "HASHED")).thenReturn(false);
         Optional<UserAccount> account = userService.authenticate("olena@example.com", "wrong");
