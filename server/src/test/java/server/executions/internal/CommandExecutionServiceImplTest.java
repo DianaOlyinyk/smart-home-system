@@ -6,9 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.util.ReflectionTestUtils;
 import server.commands.Command;
 import server.commands.CommandService;
 import server.commands.RequiredRole;
+import server.devices.Device;
 import server.executions.CommandExecutedEvent;
 import server.executions.CommandExecution;
 import server.executions.CommandExecutionRepository;
@@ -49,11 +51,12 @@ class CommandExecutionServiceImplTest {
     private final UUID deviceId = UUID.randomUUID();
     private final UUID commandId = UUID.randomUUID();
     private final Command command = new Command(
-            commandId, deviceId, "set_brightness", "{}", RequiredRole.OWNER, Instant.now());
+            mock(Device.class), "set_brightness", "{}", RequiredRole.OWNER, Instant.now());
     private final Map<String, Object> args = Map.of("brightness", 80);
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(command, "id", commandId);
         org.mockito.Mockito.lenient().when(commandExecutionRepository.save(any()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
     }
@@ -74,7 +77,7 @@ class CommandExecutionServiceImplTest {
         CommandExecution execution = service.execute(deviceId, commandId, args);
 
         assertEquals(ExecutionStatus.SUCCESS, execution.status());
-        verify(commandArgsValidator).validate(command.argsSchema(), args);
+        verify(commandArgsValidator).validate(command.getArgsSchema(), args);
         verify(commandExecutionRepository, org.mockito.Mockito.times(2)).save(any());
         verify(eventPublisher).publishEvent(new CommandExecutedEvent(execution.id(), ExecutionStatus.SUCCESS));
     }

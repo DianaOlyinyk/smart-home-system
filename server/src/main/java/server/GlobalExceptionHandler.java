@@ -20,6 +20,7 @@ import server.executions.UnsupportedCommandException;
 import server.users.EmailAlreadyRegisteredException;
 import server.users.UserNotFoundException;
 import server.devices.DeviceNotFoundException;
+import server.commands.CommandAlreadyExistsException;
 import org.springframework.validation.FieldError;
 
 import java.util.Map;
@@ -125,6 +126,11 @@ class GlobalExceptionHandler {
     ProblemDetail handleUnexpected(Exception ex) {
         return problemDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Внутрішня помилка сервера",
                 "Сталася непередбачена помилка. Спробуйте пізніше", ex);
+    }
+
+    @ExceptionHandler(CommandAlreadyExistsException.class)
+    ProblemDetail handleCommandConflict(CommandAlreadyExistsException ex) {
+        return problemDetail(HttpStatus.CONFLICT, "Команда з такою назвою вже існує", ex.getMessage(), ex);
     }
 
     private ProblemDetail problemDetail(HttpStatus status, String title, String detail, Exception ex) {
