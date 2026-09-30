@@ -57,4 +57,14 @@
 	- Додав та оновив тести для перевірки роботи репозиторіїв, доступів, cascade та `orphanRemoval`.
 	-	Вирішив конфлікти під час об'єднання змін із `main` та перевірив збірку проєкту.
 
-	
+- Олійник Діана
+  	- Реалізовано DeviceService з методами:
+	- Контролер DeviceController з REST‑ендпоінтами для CRUD операцій.
+ 	- DTO DeviceResponse
+	- Додано сутність Device з колекцією accesses (@OneToMany(mappedBy = "device", cascade = ALL, orphanRemoval = true)).
+	- DeviceAccess як сторону‑власника
+	- DeviceRepository:
+ 	- DeviceAccessRepository:
+	- Написано тест DeviceRepositoryTest 
+
+
