@@ -60,6 +60,7 @@ class CommandExecutionServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(command, "id", commandId);
         org.mockito.Mockito.lenient().when(commandExecutionRepository.save(any()))
                 .thenAnswer(invocation -> {
                     CommandExecution execution = invocation.getArgument(0);

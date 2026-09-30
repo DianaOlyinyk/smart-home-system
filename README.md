@@ -91,6 +91,8 @@
 
 Замість вкладених списків користувачів усередині `Device` виділяємо звʼязок в окрему сутність `DeviceAccess` — нормалізовану структуру, яку зручно і зберігати в PostgreSQL, і перевіряти у Spring Security. Аналогічно, виконання команди — це не рядок у списку логів, а повноцінна сутність `CommandExecution`: WebSocket-обмін з пристроєм асинхронний, тож потрібен статус `PENDING`, поки очікуємо відповідь.
 
+![ER-діаграма](ProjectDiagram.drawio.png)
+
 ### User
 | Поле | Тип | Примітка |
 |---|---|---|
@@ -165,3 +167,19 @@
 * Spring Boot 4.1.1
 * Spring Security 7.1.1
 * Spring Shell 4.0.3
+
+## 9. REST API
+
+### Команди
+| Метод | Шлях | Тіло | Відповідь |
+|---|---|---|---|
+| `POST` | `/devices/{deviceId}/commands` | `{"name", "argsSchema", "requiredRole"}` | `201` + команда, заголовок `Location` |
+| `GET` | `/devices/{deviceId}/commands?requiredRole=` | — | `200` + список, відсортований за `name`; `requiredRole` необов'язковий |
+| `PUT` | `/devices/{deviceId}/commands/{commandId}` | `{"argsSchema", "requiredRole"}` | `204` |
+| `DELETE` | `/devices/{deviceId}/commands/{commandId}` | — | `204` |
+
+| Код | Коли |
+|---|---|
+| `400` | невалідне тіло або `requiredRole` не `OWNER`/`GUEST` |
+| `404` | пристрій не існує, або команда не належить цьому пристрою |
+| `409` | пристрій вже має команду з такою `name` |

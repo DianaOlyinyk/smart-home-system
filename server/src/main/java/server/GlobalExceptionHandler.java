@@ -1,5 +1,6 @@
 package server;
-
+import server.devices.AccessAlreadyGrantedException;
+import server.devices.DeviceAccessNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ import server.executions.UnsupportedCommandException;
 import server.users.EmailAlreadyRegisteredException;
 import server.users.UserNotFoundException;
 import server.devices.DeviceNotFoundException;
-
+import server.commands.CommandAlreadyExistsException;
 import org.springframework.validation.FieldError;
 
 import java.util.Map;
@@ -38,6 +39,16 @@ class GlobalExceptionHandler {
     @ExceptionHandler(DeviceNotFoundException.class)
     ProblemDetail handleDeviceNotFound(DeviceNotFoundException ex) {
         return problemDetail(HttpStatus.NOT_FOUND, "Пристрій не знайдено", ex.getMessage(), ex);
+    }
+
+    @ExceptionHandler(AccessAlreadyGrantedException.class)
+    ProblemDetail handleAccessAlreadyGranted(AccessAlreadyGrantedException ex) {
+        return problemDetail(HttpStatus.CONFLICT, "Доступ уже надано", ex.getMessage(), ex);
+    }
+
+    @ExceptionHandler(DeviceAccessNotFoundException.class)
+    ProblemDetail handleDeviceAccessNotFound(DeviceAccessNotFoundException ex) {
+        return problemDetail(HttpStatus.NOT_FOUND, "Доступ до пристрою не знайдено", ex.getMessage(), ex);
     }
 
     @ExceptionHandler(EmailAlreadyRegisteredException.class)
@@ -115,6 +126,11 @@ class GlobalExceptionHandler {
     ProblemDetail handleUnexpected(Exception ex) {
         return problemDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Внутрішня помилка сервера",
                 "Сталася непередбачена помилка. Спробуйте пізніше", ex);
+    }
+
+    @ExceptionHandler(CommandAlreadyExistsException.class)
+    ProblemDetail handleCommandConflict(CommandAlreadyExistsException ex) {
+        return problemDetail(HttpStatus.CONFLICT, "Команда з такою назвою вже існує", ex.getMessage(), ex);
     }
 
     private ProblemDetail problemDetail(HttpStatus status, String title, String detail, Exception ex) {
