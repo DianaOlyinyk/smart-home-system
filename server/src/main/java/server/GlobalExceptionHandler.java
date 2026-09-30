@@ -20,7 +20,6 @@ import server.executions.UnsupportedCommandException;
 import server.users.EmailAlreadyRegisteredException;
 import server.users.UserNotFoundException;
 import server.devices.DeviceNotFoundException;
-
 import org.springframework.validation.FieldError;
 
 import java.util.Map;

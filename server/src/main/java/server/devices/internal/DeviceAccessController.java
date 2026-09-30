@@ -1,62 +1,69 @@
 package server.devices.internal;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import server.devices.AccessAlreadyGrantedException;
+import server.devices.AccessRole;
+import server.devices.Device;
+import server.devices.DeviceAccess;
+import server.devices.DeviceAccessNotFoundException;
+import server.devices.DeviceAccessRepository;
+import server.devices.DeviceNotFoundException;
+import server.devices.DeviceRepository;
+import server.users.User;
+import server.users.UserService;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-@RestController
-class DeviceAccessController {
+@Service
+@Transactional
+class DeviceAccessService {
 
-    private final DeviceAccessService accessService;
+    private final DeviceRepository deviceRepository;
+    private final DeviceAccessRepository accessRepository;
+    private final UserService userService;
 
-    DeviceAccessController(DeviceAccessService accessService) {
-        this.accessService = accessService;
+    DeviceAccessService(DeviceRepository deviceRepository, DeviceAccessRepository accessRepository, UserService userService) {
+        this.deviceRepository = deviceRepository;
+        this.accessRepository = accessRepository;
+        this.userService = userService;
     }
 
-    @PostMapping("/devices/{id}/accesses")
-    ResponseEntity<DeviceAccessResponse> grant(
-            @PathVariable UUID id,
-            @Valid @RequestBody GrantAccessRequest request) {
-        UUID grantedById = UUID.randomUUID();
-        DeviceAccess access = accessService.grant(id, request.email(), request.role(), grantedById);
-        return ResponseEntity.status(HttpStatus.CREATED).body(DeviceAccessResponse.from(access));
+    DeviceAccess grant(UUID deviceId, String email, AccessRole role, UUID grantedById) {
+        Device device = deviceRepository.findByIdWithAccesses(deviceId)
+                .orElseThrow(() -> new DeviceNotFoundException(deviceId));
+        User targetUser = userService.getUserByEmail(email);
+        if (accessRepository.existsByDeviceIdAndUserId(deviceId, targetUser.getId())) {
+            throw new AccessAlreadyGrantedException();
+        }
+        User grantedBy = userService.getUser(grantedById);
+        device.grantAccess(targetUser, role, grantedBy, Instant.now());
+        Device saved = deviceRepository.save(device);
+        return saved.getAccesses().stream()
+                .filter(access -> access.getUserId().equals(targetUser.getId()))
+                .findFirst()
+                .orElseThrow();
     }
 
-    @DeleteMapping("/devices/{id}/accesses/{userId}")
-    ResponseEntity<Void> revoke(@PathVariable UUID id, @PathVariable UUID userId) {
-        accessService.revoke(id, userId);
-        return ResponseEntity.noContent().build();
+    void revoke(UUID deviceId, UUID userId) {
+        Device device = deviceRepository.findByIdWithAccesses(deviceId)
+                .orElseThrow(() -> new DeviceNotFoundException(deviceId));
+        boolean removed = device.revokeAccess(userId);
+        if (!removed) {
+            throw new DeviceAccessNotFoundException();
+        }
+        deviceRepository.save(device);
     }
 
-    @GetMapping("/devices/{id}/accesses")
-    ResponseEntity<List<DeviceAccessResponse>> findByDevice(@PathVariable UUID id) {
-        List<DeviceAccessResponse> responses = accessService.findByDevice(id).stream()
-                .map(DeviceAccessResponse::from).toList();
-        return ResponseEntity.ok(responses);
+    @Transactional(readOnly = true)
+    List<DeviceAccess> findByDevice(UUID deviceId) {
+        Device device = deviceRepository.findByIdWithAccesses(deviceId)
+                .orElseThrow(() -> new DeviceNotFoundException(deviceId));
+        return List.copyOf(device.getAccesses());
     }
 
-    @GetMapping("/users/{userId}/devices")
-    ResponseEntity<List<DeviceAccessResponse>> findByUser(@PathVariable UUID userId) {
-        List<DeviceAccessResponse> responses = accessService.findByUser(userId).stream()
-                .map(DeviceAccessResponse::from).toList();
-        return ResponseEntity.ok(responses);
-    }
-}
-
-record GrantAccessRequest(
-        @NotBlank(message = "Email є обов'язковим") String email,
-        @NotBlank(message = "Роль є обов'язковою") String role) {}
-
-record DeviceAccessResponse(UUID id, UUID deviceId, UUID userId, String role) {
-    static DeviceAccessResponse from(DeviceAccess access) {
-        return new DeviceAccessResponse(
-                access.getId(),
-                access.getDevice().getId(),
-                access.getUser().getId(),
-                access.getRole()
-        );
+    @Transactional(readOnly = true)
+    List<DeviceAccess> findByUser(UUID userId) {
+        return accessRepository.findAllByUserIdWithDevice(userId);
     }
 }
