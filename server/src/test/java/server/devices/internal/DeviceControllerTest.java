@@ -6,6 +6,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import server.devices.Device;
 import server.devices.DeviceService;
@@ -36,7 +37,7 @@ class DeviceControllerTest {
         UUID id = UUID.randomUUID();
         Instant now = Instant.parse("2026-01-01T00:00:00Z");
         Device device = new Device("Лампа", DeviceType.LAMP, "token-123", now);
-        org.springframework.test.util.ReflectionTestUtils.setField(device, "id", id);
+        ReflectionTestUtils.setField(device, "id", id);
         when(deviceService.create(eq("Лампа"), eq(DeviceType.LAMP)))
                 .thenReturn(device);
 

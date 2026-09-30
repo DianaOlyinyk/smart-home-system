@@ -1,19 +1,9 @@
 package server.devices;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import server.devices.internal.DeviceAccess;
+
+import jakarta.persistence.*;
+import server.users.User;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "devices")
@@ -23,36 +13,74 @@ public class Device {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false)
     private DeviceType type;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "connection_token", nullable = false)
     private String connectionToken;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "device",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private Set<DeviceAccess> accesses = new HashSet<>();
 
-    protected Device() {}
+    protected Device() {
+
+    }
 
     public Device(String name, DeviceType type, String connectionToken, Instant createdAt) {
         this.name = name;
         this.type = type;
         this.connectionToken = connectionToken;
-        this.createdAt = createdAt;
+        this.createdAt = createdAt != null ? createdAt : Instant.now();
+    }
+
+    public void grantAccess(User user, AccessRole role, User grantedBy, Instant at) {
+        Optional<DeviceAccess> existingAccess = accesses.stream()
+                .filter(a -> a.getUserId().equals(user.getId()))
+                .findFirst();
+        if (existingAccess.isPresent()) {
+            DeviceAccess access = existingAccess.get();
+            access.setRole(role);
+            access.updateGrantedDetails(grantedBy, at);
+        } else {
+            DeviceAccess access = new DeviceAccess(this, user, role, grantedBy, at);
+            this.accesses.add(access);
+        }
+    }
+
+    public boolean revokeAccess(UUID userId) {
+        return this.accesses.removeIf(access -> access.getUserId().equals(userId));
     }
 
     public UUID getId() { return id; }
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
     public DeviceType getType() { return type; }
     public String getConnectionToken() { return connectionToken; }
     public Instant getCreatedAt() { return createdAt; }
-    public Set<DeviceAccess> getAccesses() { return accesses; }
+
+    public Set<DeviceAccess> getAccesses() {
+        return Collections.unmodifiableSet(accesses);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Device that)) return false;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

@@ -7,6 +7,7 @@ import server.users.User;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import server.users.User;
 
 public interface UserRepository extends ListCrudRepository<User, UUID>{
 
