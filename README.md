@@ -165,3 +165,19 @@
 * Spring Boot 4.1.1
 * Spring Security 7.1.1
 * Spring Shell 4.0.3
+
+## 9. REST API
+
+### Команди
+| Метод | Шлях | Тіло | Відповідь |
+|---|---|---|---|
+| `POST` | `/devices/{deviceId}/commands` | `{"name", "argsSchema", "requiredRole"}` | `201` + команда, заголовок `Location` |
+| `GET` | `/devices/{deviceId}/commands?requiredRole=` | — | `200` + список, відсортований за `name`; `requiredRole` необов'язковий |
+| `PUT` | `/devices/{deviceId}/commands/{commandId}` | `{"argsSchema", "requiredRole"}` | `204` |
+| `DELETE` | `/devices/{deviceId}/commands/{commandId}` | — | `204` |
+
+| Код | Коли |
+|---|---|
+| `400` | невалідне тіло або `requiredRole` не `OWNER`/`GUEST` |
+| `404` | пристрій не існує, або команда не належить цьому пристрою |
+| `409` | пристрій вже має команду з такою `name` |
