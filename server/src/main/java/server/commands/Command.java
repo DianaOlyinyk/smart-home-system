@@ -55,4 +55,12 @@ public class Command{
     public Instant getCreatedAt() {
         return createdAt;
     }
+
+    public void setArgsSchema(String argsSchema) {
+        this.argsSchema = argsSchema;
+    }
+
+    public void setRequiredRole(RequiredRole requiredRole) {
+        this.requiredRole = requiredRole;
+    }
 }
