@@ -1,5 +1,6 @@
 package server;
 import server.devices.AccessAlreadyGrantedException;
+import server.devices.CommandExecutionNotFoundException;
 import server.devices.DeviceAccessNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,11 @@ class GlobalExceptionHandler {
     @ExceptionHandler(CommandNotFoundException.class)
     ProblemDetail handleCommandNotFound(CommandNotFoundException ex) {
         return problemDetail(HttpStatus.NOT_FOUND, "Команду не знайдено", ex.getMessage(), ex);
+    }
+
+    @ExceptionHandler(CommandExecutionNotFoundException.class)
+    ProblemDetail handleCommandExecutionNotFound(CommandExecutionNotFoundException ex) {
+        return problemDetail(HttpStatus.NOT_FOUND, "Виконання команди не знайдено", ex.getMessage(), ex);
     }
 
     @ExceptionHandler(InvalidCommandArgsException.class)
