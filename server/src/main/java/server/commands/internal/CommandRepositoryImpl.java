@@ -1,8 +1,10 @@
 package server.commands.internal;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.context.event.EventListener;
 import server.commands.Command;
 import server.commands.CommandRepository;
+import server.devices.DeviceDeletedEvent;
 
 import java.util.Map;
 import java.util.Optional;
@@ -52,5 +54,15 @@ public class CommandRepositoryImpl implements CommandRepository {
 
 		return findById(commandId)
 				.filter(command -> deviceId.equals(command.deviceId()));
+	}
+
+	@Override
+	public void deleteByDeviceId(UUID deviceId) {
+		storage.entrySet().removeIf(entry -> deviceId.equals(entry.getValue().deviceId()));
+	}
+
+	@EventListener
+	void onDeviceDeleted(DeviceDeletedEvent event) {
+		deleteByDeviceId(event.deviceId());
 	}
 }

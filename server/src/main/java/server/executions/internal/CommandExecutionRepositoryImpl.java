@@ -1,8 +1,10 @@
 package server.executions.internal;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.context.event.EventListener;
 import server.executions.CommandExecution;
 import server.executions.CommandExecutionRepository;
+import server.devices.DeviceDeletedEvent;
 
 import java.util.Map;
 import java.util.Optional;
@@ -23,5 +25,15 @@ class CommandExecutionRepositoryImpl implements CommandExecutionRepository {
     @Override
     public Optional<CommandExecution> findById(UUID id) {
         return Optional.ofNullable(executions.get(id));
+    }
+
+    @Override
+    public void deleteByDeviceId(UUID deviceId) {
+        executions.entrySet().removeIf(entry -> deviceId.equals(entry.getValue().deviceId()));
+    }
+
+    @EventListener
+    void onDeviceDeleted(DeviceDeletedEvent event) {
+        deleteByDeviceId(event.deviceId());
     }
 }

@@ -5,8 +5,15 @@ import java.util.UUID;
 import server.devices.Device;
 import server.devices.DeviceType;
 
-record DeviceResponse(UUID id, String name, DeviceType type, String connectionToken, Instant createdAt) {
+import java.util.Set;
+
+record DeviceResponse(UUID id, String name, DeviceType type, String connectionToken, Instant createdAt,
+                      Set<DeviceAccessResponse> accesses) {
     static DeviceResponse from(Device device) {
-        return new DeviceResponse(device.id(), device.name(), device.type(), device.connectionToken(), device.createdAt());
+        Set<DeviceAccessResponse> accesses = device.getAccesses().stream()
+                .map(DeviceAccessResponse::from)
+                .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        return new DeviceResponse(device.id(), device.name(), device.type(), device.connectionToken(),
+                device.createdAt(), accesses);
     }
 }

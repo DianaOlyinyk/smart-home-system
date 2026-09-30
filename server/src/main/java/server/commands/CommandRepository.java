@@ -10,4 +10,6 @@ public interface CommandRepository {
 	Optional<Command> findById(UUID id);
 
 	Optional<Command> findByDeviceIdAndCommandId(UUID deviceId, UUID commandId);
+
+	void deleteByDeviceId(UUID deviceId);
 }
