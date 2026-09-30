@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @WebMvcTest(CommandController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -29,8 +30,10 @@ class CommandControllerTest {
         UUID deviceId = UUID.randomUUID();
         UUID commandId = UUID.randomUUID();
         Instant now = Instant.parse("2026-01-01T00:00:00Z");
+        Command command = new Command(deviceId, "set_brightness", "{}", RequiredRole.GUEST, now);
+        ReflectionTestUtils.setField(command, "id", commandId);
         when(commandService.create(eq(deviceId), eq("set_brightness"), eq("{}"), eq(RequiredRole.GUEST)))
-        .thenReturn(new Command(commandId, deviceId, "set_brightness", "{}", RequiredRole.GUEST, now));
+            .thenReturn(command);
         mockMvc.perform(post("/devices/{deviceId}/commands", deviceId)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""

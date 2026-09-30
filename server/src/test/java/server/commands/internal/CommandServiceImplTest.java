@@ -46,7 +46,7 @@ class CommandServiceImplTest {
 
         Command result = commandService.create(deviceId, "turn_on", "{}", RequiredRole.GUEST);
 
-        assertEquals(deviceId, result.deviceId());
+        assertEquals(deviceId, result.getDeviceId());
         verify(commandRepository).save(any());
     }
 
@@ -63,7 +63,7 @@ class CommandServiceImplTest {
     @Test
     void throwsWhenCommandMissing() {
         UUID deviceId = UUID.randomUUID(), commandId = UUID.randomUUID();
-        when(commandRepository.findByDeviceIdAndCommandId(deviceId, commandId))
+        when(commandRepository.findById(commandId))
                 .thenReturn(Optional.empty());
 
         assertThrows(CommandNotFoundException.class, () ->

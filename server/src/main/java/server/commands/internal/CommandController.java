@@ -21,7 +21,7 @@ public class CommandController {
             Command command = commandService.create(
             deviceId, request.name(), request.argsSchema(), request.requiredRole());
             return ResponseEntity
-                .created(URI.create("/devices/" + deviceId + "/commands/" + command.id()))
+                .created(URI.create("/devices/" + deviceId + "/commands/" + command.getId()))
                 .body(CommandResponse.from(command));
     }
 }

@@ -29,7 +29,6 @@ class CommandServiceImpl implements CommandService {
     public Command create(UUID deviceId, String name, String argsSchema, RequiredRole requiredRole) {
         deviceService.findById(deviceId);
         Command command = new Command(
-                UUID.randomUUID(),
                 deviceId,
                 name,
                 argsSchema,
@@ -41,7 +40,7 @@ class CommandServiceImpl implements CommandService {
 
     @Override
     public Command findByDeviceIdAndCommandId(UUID deviceId, UUID commandId) {
-        return commandRepository.findByDeviceIdAndCommandId(deviceId, commandId)
+        return commandRepository.findById(commandId)
                 .orElseThrow(() -> new CommandNotFoundException(deviceId, commandId));
     }
 }

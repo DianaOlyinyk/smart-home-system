@@ -41,9 +41,9 @@ class CommandExecutionServiceImpl implements CommandExecutionService {
     @Override
     public CommandExecution execute(UUID deviceId, UUID commandId, Map<String, Object> args) {
         Command command = commandService.findByDeviceIdAndCommandId(deviceId, commandId);
-        commandArgsValidator.validate(command.argsSchema(), args);
+        commandArgsValidator.validate(command.getArgsSchema(), args);
 
-        CommandExecutionStrategy strategy = strategyResolver.resolve(command.name());
+        CommandExecutionStrategy strategy = strategyResolver.resolve(command.getName());
 
         CommandExecution execution = new CommandExecution(
                 UUID.randomUUID(), deviceId, commandId, args, ExecutionStatus.PENDING, Instant.now());
