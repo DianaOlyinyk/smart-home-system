@@ -1,6 +1,8 @@
 package server.devices;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import server.users.User;
 import java.time.Instant;
 import java.util.Objects;
@@ -26,14 +28,16 @@ public class DeviceAccess {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private AccessRole role;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "granted_by", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "granted_by")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User grantedBy;
 
     @Column(name = "granted_at", nullable = false)
@@ -57,7 +61,7 @@ public class DeviceAccess {
     public UUID getUserId() { return user.getId(); }
     public AccessRole getRole() { return role; }
     public User getGrantedBy() { return grantedBy; }
-    public UUID getGrantedById() { return grantedBy.getId(); }
+    public UUID getGrantedById() { return grantedBy == null ? null : grantedBy.getId(); }
     public Instant getGrantedAt() { return grantedAt; }
 
     public void setRole(AccessRole role) {
