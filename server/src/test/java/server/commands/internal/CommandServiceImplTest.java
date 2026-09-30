@@ -17,7 +17,7 @@ import java.time.Clock;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -41,12 +41,13 @@ class CommandServiceImplTest {
     @Test
     void createsCommandWhenDeviceExists() {
         UUID deviceId = UUID.randomUUID();
-        when(deviceService.findById(deviceId)).thenReturn(mock(Device.class));
+        Device device = mock(Device.class);
+        when(deviceService.findById(deviceId)).thenReturn(device);
         when(commandRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         Command result = commandService.create(deviceId, "turn_on", "{}", RequiredRole.GUEST);
 
-        assertEquals(deviceId, result.getDeviceId());
+        assertSame(device, result.getDevice());
         verify(commandRepository).save(any());
     }
 

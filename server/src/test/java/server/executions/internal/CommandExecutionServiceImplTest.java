@@ -10,6 +10,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import server.commands.Command;
 import server.commands.CommandService;
 import server.commands.RequiredRole;
+import server.devices.Device;
 import server.executions.CommandExecutedEvent;
 import server.executions.CommandExecution;
 import server.executions.CommandExecutionRepository;
@@ -50,7 +51,7 @@ class CommandExecutionServiceImplTest {
     private final UUID deviceId = UUID.randomUUID();
     private final UUID commandId = UUID.randomUUID();
     private final Command command = new Command(
-            deviceId, "set_brightness", "{}", RequiredRole.OWNER, Instant.now());
+            mock(Device.class), "set_brightness", "{}", RequiredRole.OWNER, Instant.now());
     private final Map<String, Object> args = Map.of("brightness", 80);
 
     @BeforeEach

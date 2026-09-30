@@ -27,9 +27,10 @@ class CommandServiceImpl implements CommandService {
 
     @Override
     public Command create(UUID deviceId, String name, String argsSchema, RequiredRole requiredRole) {
-        deviceService.findById(deviceId);
+        var device = deviceService.findById(deviceId);
+
         Command command = new Command(
-                deviceId,
+                device,
                 name,
                 argsSchema,
                 requiredRole,

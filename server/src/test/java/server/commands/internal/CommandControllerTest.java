@@ -9,7 +9,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import server.commands.Command;
 import server.commands.CommandService;
 import server.commands.RequiredRole;
+import server.devices.Device;
 import server.devices.DeviceNotFoundException;
+import server.devices.DeviceType;
 import java.time.Instant;
 import java.util.UUID;
 import static org.mockito.ArgumentMatchers.*;
@@ -30,7 +32,9 @@ class CommandControllerTest {
         UUID deviceId = UUID.randomUUID();
         UUID commandId = UUID.randomUUID();
         Instant now = Instant.parse("2026-01-01T00:00:00Z");
-        Command command = new Command(deviceId, "set_brightness", "{}", RequiredRole.GUEST, now);
+        Device device = new Device("Лампа", DeviceType.LAMP, "token", now);
+        ReflectionTestUtils.setField(device, "id", deviceId);
+        Command command = new Command(device, "set_brightness", "{}", RequiredRole.GUEST, now);
         ReflectionTestUtils.setField(command, "id", commandId);
         when(commandService.create(eq(deviceId), eq("set_brightness"), eq("{}"), eq(RequiredRole.GUEST)))
             .thenReturn(command);
@@ -41,6 +45,7 @@ class CommandControllerTest {
                     """))
             .andExpect(status().isCreated())
             .andExpect(header().string("Location", "/devices/" + deviceId + "/commands/" + commandId))
+            .andExpect(jsonPath("$.deviceId").value(deviceId.toString()))
             .andExpect(jsonPath("$.name").value("set_brightness"))
             .andExpect(jsonPath("$.requiredRole").value("GUEST"));
 }
