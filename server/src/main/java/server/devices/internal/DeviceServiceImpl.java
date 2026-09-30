@@ -1,15 +1,15 @@
 package server.devices.internal;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import server.devices.AccessRole;
 import server.devices.Device;
 import server.devices.DeviceNotFoundException;
 import server.devices.DeviceRepository;
 import server.devices.DeviceService;
 import server.devices.DeviceType;
-import server.devices.DeviceDeletedEvent;
-import org.springframework.context.ApplicationEventPublisher;
 import server.users.User;
-import server.users.UserRepository;
+import server.users.UserService;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -20,40 +20,25 @@ import java.util.UUID;
 class DeviceServiceImpl implements DeviceService {
 
     private final DeviceRepository deviceRepository;
+    private final UserService userService;
     private final Clock clock;
-    private final UserRepository userRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
-    DeviceServiceImpl(DeviceRepository deviceRepository, Clock clock) {
-        this(deviceRepository, clock, null, null);
-    }
-
-    @org.springframework.beans.factory.annotation.Autowired
-    DeviceServiceImpl(DeviceRepository deviceRepository, Clock clock, UserRepository userRepository,
-                      ApplicationEventPublisher eventPublisher) {
+    DeviceServiceImpl(DeviceRepository deviceRepository, UserService userService, Clock clock) {
         this.deviceRepository = deviceRepository;
+        this.userService = userService;
         this.clock = clock;
-        this.userRepository = userRepository;
-        this.eventPublisher = eventPublisher;
     }
 
     @Override
-    public Device create(String name, DeviceType type) {
-        Device device = new Device(UUID.randomUUID(), name, type, UUID.randomUUID().toString(), Instant.now(clock));
-        return deviceRepository.save(device);
-    }
-
-    @Override
+    @Transactional
     public Device create(String name, DeviceType type, UUID ownerId) {
-        Device device = create(name, type);
+        Instant now = Instant.now(clock);
+        Device device = new Device(name, type, UUID.randomUUID().toString(), now);
         if (ownerId != null) {
-            User owner = userRepository == null
-                    ? new User(ownerId, "owner-" + ownerId + "@example.test", "", "Owner", Instant.now(clock))
-                    : userRepository.findById(ownerId).orElseThrow(() -> new IllegalArgumentException("Owner not found: " + ownerId));
-            device.grantAccess(owner, server.devices.AccessRole.OWNER, owner, Instant.now(clock));
-            device = deviceRepository.save(device);
+            User owner = userService.getUser(ownerId);
+            device.grantAccess(owner, AccessRole.OWNER, owner, now);
         }
-        return device;
+        return deviceRepository.save(device);
     }
 
     @Override
@@ -62,28 +47,30 @@ class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Device> findAll(DeviceType type) {
-        return deviceRepository.findAll(type);
+        return type == null
+                ? deviceRepository.findAllWithAccesses()
+                : deviceRepository.findByTypeOrderByNameAsc(type);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Device getWithAccesses(UUID id) {
-        return deviceRepository.getWithAccesses(id).orElseThrow(() -> new DeviceNotFoundException(id));
+        return deviceRepository.findByIdWithAccesses(id).orElseThrow(() -> new DeviceNotFoundException(id));
     }
 
     @Override
+    @Transactional
     public Device rename(UUID id, String name) {
-        Device device = findById(id);
+        Device device = getWithAccesses(id);
         device.rename(name);
-        return deviceRepository.save(device);
+        return device;
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
-        findById(id);
-        deviceRepository.deleteById(id);
-        if (eventPublisher != null) {
-            eventPublisher.publishEvent(new DeviceDeletedEvent(id));
-        }
+        deviceRepository.delete(findById(id));
     }
 }

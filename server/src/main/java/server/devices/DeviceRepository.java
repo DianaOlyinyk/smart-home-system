@@ -21,12 +21,4 @@ public interface DeviceRepository extends JpaRepository<Device, UUID> {
 
     @EntityGraph(attributePaths = {"accesses"})
     List<Device> findByTypeOrderByNameAsc(DeviceType type);
-
-    default List<Device> findAll(DeviceType type) {
-        return type == null ? findAllWithAccesses() : findByTypeOrderByNameAsc(type);
-    }
-
-    default Optional<Device> getWithAccesses(UUID id) {
-        return findByIdWithAccesses(id);
-    }
 }

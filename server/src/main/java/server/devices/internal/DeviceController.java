@@ -2,15 +2,16 @@ package server.devices.internal;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import server.devices.Device;
 import server.devices.DeviceService;
 import server.devices.DeviceType;
@@ -30,11 +31,11 @@ class DeviceController {
     }
 
     @PostMapping
-    ResponseEntity<DeviceResponse> create(@Valid @RequestBody CreateDeviceRequest request) {
-        Device device = request.ownerId() == null
-                ? deviceService.create(request.name(), request.type())
-                : deviceService.create(request.name(), request.type(), request.ownerId());
-        return ResponseEntity.created(URI.create("/devices/" + device.id()))
+    ResponseEntity<DeviceResponse> create(
+            @RequestHeader(name = "X-User-Id", required = false) UUID userId,
+            @Valid @RequestBody CreateDeviceRequest request) {
+        Device device = deviceService.create(request.name(), request.type(), userId);
+        return ResponseEntity.created(URI.create("/devices/" + device.getId()))
                 .body(DeviceResponse.from(device));
     }
 
@@ -44,7 +45,7 @@ class DeviceController {
     }
 
     @GetMapping("/{id}")
-    DeviceResponse getWithAccesses(@PathVariable UUID id) {
+    DeviceResponse getById(@PathVariable UUID id) {
         return DeviceResponse.from(deviceService.getWithAccesses(id));
     }
 

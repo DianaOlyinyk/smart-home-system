@@ -10,4 +10,8 @@ public enum ExecutionStatus {
             case SUCCESS, FAILED, TIMEOUT -> false;
         };
     }
+
+    public boolean isTerminal() {
+        return this == SUCCESS || this == FAILED || this == TIMEOUT;
+    }
 }

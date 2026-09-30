@@ -44,11 +44,6 @@ public class Device {
         this.createdAt = createdAt != null ? createdAt : Instant.now();
     }
 
-    public Device(UUID id, String name, DeviceType type, String connectionToken, Instant createdAt) {
-        this(name, type, connectionToken, createdAt);
-        this.id = id;
-    }
-
     public void grantAccess(User user, AccessRole role, User grantedBy, Instant at) {
         Optional<DeviceAccess> existingAccess = accesses.stream()
                 .filter(a -> a.getUserId().equals(user.getId()))
@@ -76,11 +71,6 @@ public class Device {
     public DeviceType getType() { return type; }
     public String getConnectionToken() { return connectionToken; }
     public Instant getCreatedAt() { return createdAt; }
-    public UUID id() { return id; }
-    public String name() { return name; }
-    public DeviceType type() { return type; }
-    public String connectionToken() { return connectionToken; }
-    public Instant createdAt() { return createdAt; }
 
     public Set<DeviceAccess> getAccesses() {
         return Collections.unmodifiableSet(accesses);
