@@ -40,7 +40,7 @@ class CommandServiceImpl implements CommandService {
 
     @Override
     public Command findByDeviceIdAndCommandId(UUID deviceId, UUID commandId) {
-        return commandRepository.findById(commandId)
+        return commandRepository.findByDeviceIdAndCommandId(deviceId, commandId)
                 .orElseThrow(() -> new CommandNotFoundException(deviceId, commandId));
     }
 }

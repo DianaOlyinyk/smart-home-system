@@ -37,6 +37,21 @@ class CommandRepositoryTest {
     }
 
     @Test
+    void findByDeviceIdAndCommandIdFindsOwnCommand() {
+        Command saved = save(deviceId, "turn_on", RequiredRole.GUEST);
+
+        assertEquals(saved.getId(),
+                commandRepository.findByDeviceIdAndCommandId(deviceId, saved.getId()).orElseThrow().getId());
+    }
+
+    @Test
+    void findByDeviceIdAndCommandIdIgnoresOtherDevicesCommand() {
+        Command otherDevicesCommand = save(UUID.randomUUID(), "unlock", RequiredRole.OWNER);
+
+        assertTrue(commandRepository.findByDeviceIdAndCommandId(deviceId, otherDevicesCommand.getId()).isEmpty());
+    }
+
+    @Test
     void findByDeviceIdReturnsOnlyThatDeviceSortedByName() {
         save(deviceId, "turn_on", RequiredRole.GUEST);
         save(deviceId, "set_brightness", RequiredRole.OWNER);

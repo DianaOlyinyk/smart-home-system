@@ -63,7 +63,7 @@ class CommandServiceImplTest {
     @Test
     void throwsWhenCommandMissing() {
         UUID deviceId = UUID.randomUUID(), commandId = UUID.randomUUID();
-        when(commandRepository.findById(commandId))
+        when(commandRepository.findByDeviceIdAndCommandId(deviceId, commandId))
                 .thenReturn(Optional.empty());
 
         assertThrows(CommandNotFoundException.class, () ->
