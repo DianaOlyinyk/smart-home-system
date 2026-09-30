@@ -30,7 +30,7 @@ class CommandExecutionController {
             @PathVariable UUID commandId,
             @Valid @RequestBody ExecuteCommandRequest request) {
         CommandExecution execution = commandExecutionService.execute(deviceId, commandId, request.args());
-        URI location = URI.create("/devices/" + deviceId + "/commands/" + commandId + "/executions/" + execution.id());
+        URI location = URI.create("/devices/" + deviceId + "/commands/" + commandId + "/executions/" + execution.getId());
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .location(location)
                 .body(CommandExecutionResponse.from(execution));

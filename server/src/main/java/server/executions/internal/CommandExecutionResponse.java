@@ -16,11 +16,11 @@ record CommandExecutionResponse(
 
     static CommandExecutionResponse from(CommandExecution execution) {
         return new CommandExecutionResponse(
-                execution.id(),
-                execution.deviceId(),
-                execution.commandId(),
-                execution.args(),
-                execution.status().name(),
-                execution.requestedAt());
+                execution.getId(),
+                execution.getDevice().getId(),
+                execution.getCommand().getId(),
+                execution.getArgs(),
+                execution.getStatus().name(),
+                execution.getRequestedAt());
     }
 }
