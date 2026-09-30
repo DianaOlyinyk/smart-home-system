@@ -24,7 +24,7 @@ class DeviceController {
     @PostMapping
     ResponseEntity<DeviceResponse> create(@Valid @RequestBody CreateDeviceRequest request) {
         Device device = deviceService.create(request.name(), request.type());
-        return ResponseEntity.created(URI.create("/devices/" + device.id()))
+        return ResponseEntity.created(URI.create("/devices/" + device.getId()))
                 .body(DeviceResponse.from(device));
     }
 }
