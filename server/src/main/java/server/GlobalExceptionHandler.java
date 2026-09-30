@@ -1,5 +1,6 @@
 package server;
-
+import server.devices.AccessAlreadyGrantedException;
+import server.devices.DeviceAccessNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,6 @@ import server.executions.UnsupportedCommandException;
 import server.users.EmailAlreadyRegisteredException;
 import server.users.UserNotFoundException;
 import server.devices.DeviceNotFoundException;
-
 import org.springframework.validation.FieldError;
 
 import java.util.Map;
@@ -38,6 +38,16 @@ class GlobalExceptionHandler {
     @ExceptionHandler(DeviceNotFoundException.class)
     ProblemDetail handleDeviceNotFound(DeviceNotFoundException ex) {
         return problemDetail(HttpStatus.NOT_FOUND, "Пристрій не знайдено", ex.getMessage(), ex);
+    }
+
+    @ExceptionHandler(AccessAlreadyGrantedException.class)
+    ProblemDetail handleAccessAlreadyGranted(AccessAlreadyGrantedException ex) {
+        return problemDetail(HttpStatus.CONFLICT, "Доступ уже надано", ex.getMessage(), ex);
+    }
+
+    @ExceptionHandler(DeviceAccessNotFoundException.class)
+    ProblemDetail handleDeviceAccessNotFound(DeviceAccessNotFoundException ex) {
+        return problemDetail(HttpStatus.NOT_FOUND, "Доступ до пристрою не знайдено", ex.getMessage(), ex);
     }
 
     @ExceptionHandler(EmailAlreadyRegisteredException.class)

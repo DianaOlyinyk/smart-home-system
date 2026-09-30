@@ -110,8 +110,14 @@ class DeviceRepositoryTest {
     }
 
     private User persistUser() {
-        User user = new User(UUID.randomUUID(), UUID.randomUUID() + "@example.test", "hash", "Test user", Instant.now());
+        User user = new User(
+                UUID.randomUUID() + "@example.test",
+                "hash",
+                "Test user",
+                Instant.now()
+        );
         entityManager.persist(user);
         return user;
     }
 }
+
