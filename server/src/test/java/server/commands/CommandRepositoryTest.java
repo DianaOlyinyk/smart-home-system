@@ -1,9 +1,13 @@
 package server.commands;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import server.devices.Device;
+import server.devices.DeviceRepository;
+import server.devices.DeviceType;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,16 +25,31 @@ class CommandRepositoryTest {
     @Autowired
     private CommandRepository commandRepository;
 
-    private final UUID deviceId = UUID.randomUUID();
+    @Autowired
+    private DeviceRepository deviceRepository;
+
     private final Instant now = Instant.parse("2026-01-01T00:00:00Z");
 
-    private Command save(UUID deviceId, String name, RequiredRole role) {
-        return commandRepository.saveAndFlush(new Command(deviceId, name, "{}", role, now));
+    private Device device;
+    private Device otherDevice;
+
+    @BeforeEach
+    void setUp() {
+        device = saveDevice("Lamp");
+        otherDevice = saveDevice("Kettle");
+    }
+
+    private Device saveDevice(String name) {
+        return deviceRepository.saveAndFlush(new Device(name, DeviceType.LAMP, UUID.randomUUID().toString(), now));
+    }
+
+    private Command save(Device device, String name, RequiredRole role) {
+        return commandRepository.saveAndFlush(new Command(device, name, "{}", role, now));
     }
 
     @Test
     void saveGeneratesId() {
-        Command saved = save(deviceId, "turn_on", RequiredRole.GUEST);
+        Command saved = save(device, "turn_on", RequiredRole.GUEST);
 
         assertNotNull(saved.getId());
         assertEquals("turn_on", commandRepository.findById(saved.getId()).orElseThrow().getName());
@@ -38,26 +57,26 @@ class CommandRepositoryTest {
 
     @Test
     void findByDeviceIdAndCommandIdFindsOwnCommand() {
-        Command saved = save(deviceId, "turn_on", RequiredRole.GUEST);
+        Command saved = save(device, "turn_on", RequiredRole.GUEST);
 
         assertEquals(saved.getId(),
-                commandRepository.findByDeviceIdAndCommandId(deviceId, saved.getId()).orElseThrow().getId());
+                commandRepository.findByDeviceIdAndCommandId(device.getId(), saved.getId()).orElseThrow().getId());
     }
 
     @Test
     void findByDeviceIdAndCommandIdIgnoresOtherDevicesCommand() {
-        Command otherDevicesCommand = save(UUID.randomUUID(), "unlock", RequiredRole.OWNER);
+        Command otherDevicesCommand = save(otherDevice, "unlock", RequiredRole.OWNER);
 
-        assertTrue(commandRepository.findByDeviceIdAndCommandId(deviceId, otherDevicesCommand.getId()).isEmpty());
+        assertTrue(commandRepository.findByDeviceIdAndCommandId(device.getId(), otherDevicesCommand.getId()).isEmpty());
     }
 
     @Test
     void findByDeviceIdReturnsOnlyThatDeviceSortedByName() {
-        save(deviceId, "turn_on", RequiredRole.GUEST);
-        save(deviceId, "set_brightness", RequiredRole.OWNER);
-        save(UUID.randomUUID(), "turn_off", RequiredRole.GUEST);
+        save(device, "turn_on", RequiredRole.GUEST);
+        save(device, "set_brightness", RequiredRole.OWNER);
+        save(otherDevice, "turn_off", RequiredRole.GUEST);
 
-        List<String> names = commandRepository.findByDeviceIdOrderByNameAsc(deviceId).stream()
+        List<String> names = commandRepository.findByDeviceIdOrderByNameAsc(device.getId()).stream()
                 .map(Command::getName)
                 .toList();
 
@@ -66,12 +85,12 @@ class CommandRepositoryTest {
 
     @Test
     void findByDeviceIdAndRequiredRoleFiltersByRole() {
-        save(deviceId, "turn_on", RequiredRole.GUEST);
-        save(deviceId, "set_brightness", RequiredRole.OWNER);
-        save(deviceId, "set_mode", RequiredRole.OWNER);
+        save(device, "turn_on", RequiredRole.GUEST);
+        save(device, "set_brightness", RequiredRole.OWNER);
+        save(device, "set_mode", RequiredRole.OWNER);
 
         List<String> names = commandRepository
-                .findByDeviceIdAndRequiredRoleOrderByNameAsc(deviceId, RequiredRole.OWNER).stream()
+                .findByDeviceIdAndRequiredRoleOrderByNameAsc(device.getId(), RequiredRole.OWNER).stream()
                 .map(Command::getName)
                 .toList();
 
@@ -80,26 +99,26 @@ class CommandRepositoryTest {
 
     @Test
     void existsByDeviceIdAndName() {
-        save(deviceId, "turn_on", RequiredRole.GUEST);
+        save(device, "turn_on", RequiredRole.GUEST);
 
-        assertTrue(commandRepository.existsByDeviceIdAndName(deviceId, "turn_on"));
-        assertFalse(commandRepository.existsByDeviceIdAndName(deviceId, "turn_off"));
-        assertFalse(commandRepository.existsByDeviceIdAndName(UUID.randomUUID(), "turn_on"));
+        assertTrue(commandRepository.existsByDeviceIdAndName(device.getId(), "turn_on"));
+        assertFalse(commandRepository.existsByDeviceIdAndName(device.getId(), "turn_off"));
+        assertFalse(commandRepository.existsByDeviceIdAndName(otherDevice.getId(), "turn_on"));
     }
 
     @Test
     void sameNameOnSameDeviceIsRejected() {
-        save(deviceId, "turn_on", RequiredRole.GUEST);
+        save(device, "turn_on", RequiredRole.GUEST);
 
         assertThrows(DataIntegrityViolationException.class,
-                () -> save(deviceId, "turn_on", RequiredRole.OWNER));
+                () -> save(device, "turn_on", RequiredRole.OWNER));
     }
 
     @Test
     void sameNameOnDifferentDevicesIsAllowed() {
-        save(deviceId, "turn_on", RequiredRole.GUEST);
-        save(UUID.randomUUID(), "turn_on", RequiredRole.GUEST);
+        save(device, "turn_on", RequiredRole.GUEST);
+        save(otherDevice, "turn_on", RequiredRole.GUEST);
 
-        assertEquals(1, commandRepository.findByDeviceIdOrderByNameAsc(deviceId).size());
+        assertEquals(1, commandRepository.findByDeviceIdOrderByNameAsc(device.getId()).size());
     }
 }

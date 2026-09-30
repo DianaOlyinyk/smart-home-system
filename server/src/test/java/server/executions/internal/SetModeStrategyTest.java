@@ -51,6 +51,6 @@ class SetModeStrategyTest {
     }
 
     private static Command command(String name) {
-        return new Command(UUID.randomUUID(), name, null, null, null);
+        return new Command(null, name, null, null, null);
     }
 }

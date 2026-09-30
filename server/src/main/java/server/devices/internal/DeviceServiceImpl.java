@@ -24,7 +24,7 @@ class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Device create(String name, DeviceType type) {
-        Device device = new Device(UUID.randomUUID(), name, type, UUID.randomUUID().toString(), Instant.now(clock));
+        Device device = new Device(name, type, UUID.randomUUID().toString(), Instant.now(clock));
         return deviceRepository.save(device);
     }
 

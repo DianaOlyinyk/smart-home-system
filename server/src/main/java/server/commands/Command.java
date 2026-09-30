@@ -3,13 +3,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import server.devices.Device;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint (columnNames = {"device_id", "name"}))
@@ -18,7 +15,9 @@ public class Command{
     @Id
     UUID id;
 
-    UUID deviceId;
+    @ManyToOne(fetch =  FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    Device device;
     String name;
     String argsSchema;
     @Enumerated(EnumType.STRING)
@@ -27,8 +26,8 @@ public class Command{
 
     public Command() {}
 
-    public Command(UUID deviceId, String name, String argsSchema, RequiredRole requiredRole, Instant createdAt) {
-        this.deviceId = deviceId;
+    public Command(Device device, String name, String argsSchema, RequiredRole requiredRole, Instant createdAt) {
+        this.device = device;
         this.name = name;
         this.argsSchema = argsSchema;
         this.requiredRole = requiredRole;
@@ -39,9 +38,7 @@ public class Command{
         return id;
     }
 
-    public UUID getDeviceId() {
-        return deviceId;
-    }
+    public Device getDevice() { return  device; }
 
     public String getName() {
         return name;

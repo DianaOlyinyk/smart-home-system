@@ -44,18 +44,18 @@ class DeviceServiceImplTest {
 
 		Device result = deviceService.create("Living room lamp", DeviceType.LAMP);
 
-		assertNotNull(result.id());
-		assertEquals("Living room lamp", result.name());
-		assertEquals(DeviceType.LAMP, result.type());
-		assertNotNull(result.connectionToken());
-		assertEquals(NOW, result.createdAt());
+		assertEquals(null, result.getId());
+		assertEquals("Living room lamp", result.getName());
+		assertEquals(DeviceType.LAMP, result.getType());
+		assertNotNull(result.getConnectionToken());
+		assertEquals(NOW, result.getCreatedAt());
 		verify(deviceRepository).save(result);
 	}
 
 	@Test
 	void findsExistingDevice() {
 		UUID deviceId = UUID.randomUUID();
-		Device device = new Device(deviceId, "Kettle", DeviceType.KETTLE, "token", NOW);
+		Device device = new Device("Kettle", DeviceType.KETTLE, "token", NOW);
 		when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(device));
 
 		Device result = deviceService.findById(deviceId);

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import server.users.User;
 
 @Component
 class UserRepositoryImpl implements UserRepository{
@@ -12,7 +13,7 @@ class UserRepositoryImpl implements UserRepository{
 
     @Override
     public User save(User user){
-        usersById.put(user.id, user);
+        usersById.put(user.getId(), user);
         return user;
     }
 
@@ -23,7 +24,7 @@ class UserRepositoryImpl implements UserRepository{
 
     @Override
     public Optional<User> findByEmail(String email){
-        return usersById.values().stream().filter(u -> u.email.equalsIgnoreCase(email))
+        return usersById.values().stream().filter(u -> u.getEmail().equalsIgnoreCase(email))
                 .findFirst();
     }
 

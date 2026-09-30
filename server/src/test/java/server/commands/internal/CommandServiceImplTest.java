@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.util.ReflectionTestUtils;
 import server.commands.Command;
 import server.commands.CommandAlreadyExistsException;
 import server.commands.CommandRepository;
@@ -14,6 +15,7 @@ import server.commands.RequiredRole;
 import server.devices.Device;
 import server.devices.DeviceNotFoundException;
 import server.devices.DeviceService;
+import server.devices.DeviceType;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -46,12 +49,13 @@ class CommandServiceImplTest {
     @Test
     void createsCommandWhenDeviceExists() {
         UUID deviceId = UUID.randomUUID();
-        when(deviceService.findById(deviceId)).thenReturn(mock(Device.class));
+        Device device = mock(Device.class);
+        when(deviceService.findById(deviceId)).thenReturn(device);
         when(commandRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         Command result = commandService.create(deviceId, "turn_on", "{}", RequiredRole.GUEST);
 
-        assertEquals(deviceId, result.getDeviceId());
+        assertSame(device, result.getDevice());
         verify(commandRepository).save(any());
     }
 
@@ -171,6 +175,8 @@ class CommandServiceImplTest {
     }
 
     private static Command command(UUID deviceId, String name) {
-        return new Command(deviceId, name, "{}", RequiredRole.GUEST, Instant.now());
+        Device device = new Device("Lamp", DeviceType.LAMP, "token", Instant.now());
+        ReflectionTestUtils.setField(device, "id", deviceId);
+        return new Command(device, name, "{}", RequiredRole.GUEST, Instant.now());
     }
 }

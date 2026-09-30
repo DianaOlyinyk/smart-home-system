@@ -11,7 +11,9 @@ import server.commands.CommandAlreadyExistsException;
 import server.commands.CommandNotFoundException;
 import server.commands.CommandService;
 import server.commands.RequiredRole;
+import server.devices.Device;
 import server.devices.DeviceNotFoundException;
+import server.devices.DeviceType;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +40,9 @@ class CommandControllerTest {
         UUID deviceId = UUID.randomUUID();
         UUID commandId = UUID.randomUUID();
         Instant now = Instant.parse("2026-01-01T00:00:00Z");
-        Command command = new Command(deviceId, "set_brightness", "{}", RequiredRole.GUEST, now);
+        Device device = new Device("Лампа", DeviceType.LAMP, "token", now);
+        ReflectionTestUtils.setField(device, "id", deviceId);
+        Command command = new Command(device, "set_brightness", "{}", RequiredRole.GUEST, now);
         ReflectionTestUtils.setField(command, "id", commandId);
         when(commandService.create(eq(deviceId), eq("set_brightness"), eq("{}"), eq(RequiredRole.GUEST)))
             .thenReturn(command);
@@ -49,6 +53,7 @@ class CommandControllerTest {
                     """))
             .andExpect(status().isCreated())
             .andExpect(header().string("Location", "/devices/" + deviceId + "/commands/" + commandId))
+            .andExpect(jsonPath("$.deviceId").value(deviceId.toString()))
             .andExpect(jsonPath("$.name").value("set_brightness"))
             .andExpect(jsonPath("$.requiredRole").value("GUEST"));
 }
@@ -103,8 +108,8 @@ class CommandControllerTest {
         UUID deviceId = UUID.randomUUID();
         Instant now = Instant.parse("2026-01-01T00:00:00Z");
         when(commandService.findAllByDevice(deviceId, null)).thenReturn(List.of(
-            new Command(deviceId, "set_brightness", "{}", RequiredRole.OWNER, now),
-            new Command(deviceId, "turn_on", "{}", RequiredRole.GUEST, now)));
+            new Command(device(deviceId), "set_brightness", "{}", RequiredRole.OWNER, now),
+            new Command(device(deviceId), "turn_on", "{}", RequiredRole.GUEST, now)));
         mockMvc.perform(get("/devices/{deviceId}/commands", deviceId))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(2))
@@ -115,7 +120,7 @@ class CommandControllerTest {
     void listCommandsPassesRequiredRoleFilter() throws Exception {
         UUID deviceId = UUID.randomUUID();
         when(commandService.findAllByDevice(deviceId, RequiredRole.OWNER)).thenReturn(List.of(
-            new Command(deviceId, "set_mode", "{}", RequiredRole.OWNER, Instant.now())));
+            new Command(device(deviceId), "set_mode", "{}", RequiredRole.OWNER, Instant.now())));
         mockMvc.perform(get("/devices/{deviceId}/commands", deviceId).param("requiredRole", "OWNER"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(1))
@@ -178,5 +183,10 @@ class CommandControllerTest {
             .when(commandService).delete(deviceId, commandId);
         mockMvc.perform(delete("/devices/{deviceId}/commands/{commandId}", deviceId, commandId))
             .andExpect(status().isNotFound());
+    }
+    private static Device device(UUID id) {
+        Device device = new Device("Лампа", DeviceType.LAMP, "token", Instant.parse("2026-01-01T00:00:00Z"));
+        ReflectionTestUtils.setField(device, "id", id);
+        return device;
     }
 }
