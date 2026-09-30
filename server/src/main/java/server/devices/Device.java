@@ -62,6 +62,10 @@ public class Device {
         return this.accesses.removeIf(access -> access.getUserId().equals(userId));
     }
 
+    public void rename(String name) {
+        this.name = name;
+    }
+
     public UUID getId() { return id; }
     public String getName() { return name; }
     public DeviceType getType() { return type; }

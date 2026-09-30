@@ -7,15 +7,19 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import server.commands.Command;
+import server.commands.RequiredRole;
 import server.devices.AccessRole;
 import server.devices.Device;
 import server.devices.DeviceAccess;
 import server.devices.DeviceRepository;
 import server.devices.DeviceType;
+import server.executions.CommandExecution;
 import server.users.User;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -107,6 +111,36 @@ class DeviceRepositoryTest {
 
         assertThat(devices).hasSize(2);
         assertThat(queryCountAfter - queryCountBefore).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Deleting a device removes its accesses, commands and executions")
+    void deletingDeviceRemovesAccessesCommandsAndExecutions() {
+        User user = persistUser();
+        Device device = new Device("Lamp", DeviceType.LAMP, "token-delete", Instant.now());
+        device.grantAccess(user, AccessRole.OWNER, user, Instant.now());
+        entityManager.persist(device);
+        Command command = new Command(device, "turn_on", "{}", RequiredRole.GUEST, Instant.now());
+        entityManager.persist(command);
+        entityManager.persist(new CommandExecution(command, device, user, Map.of("level", 1), Instant.now()));
+        entityManager.flush();
+        entityManager.clear();
+
+        deviceRepository.delete(deviceRepository.findById(device.getId()).orElseThrow());
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(count("Device")).isZero();
+        assertThat(count("DeviceAccess")).isZero();
+        assertThat(count("Command")).isZero();
+        assertThat(count("CommandExecution")).isZero();
+        assertThat(count("User")).isEqualTo(1);
+    }
+
+    private long count(String entityName) {
+        return entityManager
+                .createQuery("SELECT COUNT(e) FROM " + entityName + " e", Long.class)
+                .getSingleResult();
     }
 
     private User persistUser() {
