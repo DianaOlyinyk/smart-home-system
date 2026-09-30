@@ -14,5 +14,5 @@ public interface DeviceAccessRepository extends JpaRepository<DeviceAccess, UUID
     @Query("SELECT da FROM DeviceAccess da JOIN FETCH da.device WHERE da.user.id = :userId")
     List<DeviceAccess> findAllByUserIdWithDevice(@Param("userId") UUID userId);
 
-    boolean existsByDeviceIdAndUserId(UUID deviceId, UUID userId);
+    boolean existsByDeviceIdAndUser_Id(UUID deviceId, UUID userId);
 }

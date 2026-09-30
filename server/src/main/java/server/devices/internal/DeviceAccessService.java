@@ -41,7 +41,7 @@ class DeviceAccessService {
         Device device = deviceRepository.findByIdWithAccesses(deviceId)
                 .orElseThrow(() -> new DeviceNotFoundException(deviceId));
         User targetUser = userService.getUserByEmail(email);
-        if (accessRepository.existsByDeviceIdAndUserId(
+        if (accessRepository.existsByDeviceIdAndUser_Id(
                 deviceId, targetUser.getId())) {
             throw new AccessAlreadyGrantedException();
         }
