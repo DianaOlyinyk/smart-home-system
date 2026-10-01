@@ -72,3 +72,10 @@
     - Реалізувала `CommandExecutionRepository` на Spring Data: журнал пристрою через `@Query` з `JOIN FETCH` (один SQL-запит замість N+1), журнал гостя та пошук виконання в межах пристрою через `@EntityGraph`
     - Реалізувала CRUD виконань команд: запуск із виконавцем через `X-User-Id`, журнал пристрою з фільтром за користувачем, перегляд, зміна статусу через `PATCH` і видалення; транзакційний сервіс, завдяки якому спрацьовує аудит-лог
     - Написала `@DataJpaTest` для репозиторію (JSON, кількість SQL-запитів, каскади), Mockito- і MockMvc-тести для сервісу та контролера виконань
+
+- Забіяка Денис:
+	- Переведено `Command` на JPA-сутність: id генерує Hibernate, унікальна пара `(device_id, name)`, роль зберігається як рядок (`@Enumerated(EnumType.STRING)`)
+	- `CommandRepository` переведено на Spring Data: derived-запити `findByDeviceIdOrderByNameAsc`, `findByDeviceIdAndRequiredRoleOrderByNameAsc`, `existsByDeviceIdAndName` та `@Query` `findByDeviceIdAndCommandId` (команда шукається лише в межах свого пристрою); `CommandRepositoryImpl` видалено
+	- Реалізовано CRUD команд: `GET /devices/{id}/commands?requiredRole=`, `PUT` і `DELETE /devices/{id}/commands/{commandId}`; 404 для неіснуючого пристрою чи чужої команди, 409 на дублікат назви (включно з одночасними запитами)
+	- Оновлено README: таблиця ендпоінтів команд
+	- Написано `@DataJpaTest` для репозиторію (сортування, фільтр за роллю, унікальність), Mockito- і MockMvc-тести для сервісу та контролера
