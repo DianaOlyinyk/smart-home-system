@@ -47,7 +47,9 @@ class CommandServiceImpl implements CommandService {
             return commandRepository.save(command);
         } catch (DataIntegrityViolationException e) {
             // another request created the same name between the check and the save
-            throw new CommandAlreadyExistsException(deviceId, name);
+            CommandAlreadyExistsException exception = new CommandAlreadyExistsException(deviceId, name);
+            exception.initCause(e);
+            throw exception;
         }
     }
 

@@ -52,7 +52,9 @@ class CommandArgsValidator {
         try {
             return objectMapper.readTree(json);
         } catch (JacksonException e) {
-            throw InvalidCommandArgsException.malformedJson();
+            InvalidCommandArgsException exception = InvalidCommandArgsException.malformedJson();
+            exception.initCause(e);
+            throw exception;
         }
     }
 }
