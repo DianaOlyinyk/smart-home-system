@@ -9,10 +9,7 @@ import java.util.regex.Pattern;
 public class MaskingMessageConverter extends ClassicConverter {
 
     private static final Pattern SENSITIVE_FIELD = Pattern.compile(
-            "(?i)(\\b(?:passwordHash|password|token|connectionToken|cardNumber|cvv|cvc)\\b\"?\\s*[:=]\\s*)(\"(?:\\\\.|[^\"\\\\])*\"|'(?:\\\\.|[^'\\\\])*'|[^\\s,;}]+)"
-    );
-    private static final Pattern CARD_NUMBER = Pattern.compile(
-            "(?<![\\p{Alnum}-])(?:\\d[ -]?){12,18}\\d(?![\\p{Alnum}-])"
+            "(?i)(\\b(?:passwordHash|password|token|connectionToken)\\b\"?\\s*[:=]\\s*)(\"(?:\\\\.|[^\"\\\\])*\"|'(?:\\\\.|[^'\\\\])*'|[^\\s,;}]+)"
     );
 
     @Override
@@ -22,7 +19,7 @@ public class MaskingMessageConverter extends ClassicConverter {
             return null;
         }
 
-        return maskSensitiveFields(maskCardNumbers(message));
+        return maskSensitiveFields(message);
     }
 
     private String maskSensitiveFields(String message) {
@@ -42,9 +39,5 @@ public class MaskingMessageConverter extends ClassicConverter {
         }
         matcher.appendTail(masked);
         return masked.toString();
-    }
-
-    private String maskCardNumbers(String message) {
-        return CARD_NUMBER.matcher(message).replaceAll("***");
     }
 }
