@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -151,6 +152,12 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     ProblemDetail handleUnexpected(Exception ex) {
         return problemDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Внутрішня помилка сервера",
                 "Сталася непередбачена помилка. Спробуйте пізніше", ex);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    ProblemDetail handleAccessDenied(AccessDeniedException ex) {
+        return problemDetail(HttpStatus.FORBIDDEN, "Доступ заборонено",
+                "Недостатньо прав для виконання цієї операції.", ex);
     }
 
     @ExceptionHandler(CommandAlreadyExistsException.class)
