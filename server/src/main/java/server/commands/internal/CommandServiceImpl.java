@@ -1,5 +1,5 @@
 package server.commands.internal;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import server.commands.Command;
@@ -30,6 +30,7 @@ class CommandServiceImpl implements CommandService {
     }
 
     @Override
+    @PreAuthorize("@deviceAccessChecker.isOwner(#deviceId, authentication)")
     public Command create(UUID deviceId, String name, String argsSchema, RequiredRole requiredRole) {
         var device = deviceService.findById(deviceId);
         if (commandRepository.existsByDeviceIdAndName(deviceId, name)) {

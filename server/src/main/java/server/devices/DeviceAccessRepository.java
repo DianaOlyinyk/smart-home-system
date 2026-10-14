@@ -15,4 +15,6 @@ public interface DeviceAccessRepository extends JpaRepository<DeviceAccess, UUID
     List<DeviceAccess> findAllByUserIdWithDevice(@Param("userId") UUID userId);
 
     boolean existsByDeviceIdAndUser_Id(UUID deviceId, UUID userId);
+
+    boolean existsByDeviceIdAndUser_IdAndRole(UUID deviceId, UUID userId, AccessRole role);
 }
