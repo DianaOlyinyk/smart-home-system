@@ -18,7 +18,7 @@ import java.time.Instant;
 @Component
 class SeedDataLoader implements ApplicationRunner {
     private static final Logger log = LoggerFactory.getLogger(SeedDataLoader.class);
-    private static final String OWNER_EMAIL = "owner@smarthome.local";
+    private static final String OWNER_EMAIL = "owner@example.com";
     private final UserService userService;
     private final DeviceService deviceService;
     private final DeviceRepository deviceRepository;
@@ -38,9 +38,9 @@ class SeedDataLoader implements ApplicationRunner {
             log.info("Seed data already present, skipping");
             return;
         }
-        UserAccount owner = userService.register(OWNER_EMAIL, "Owner12345", "Owner");
-        UserAccount guest = userService.register("guest@smarthome.local", "Guest12345", "Guest");
-        UserAccount stranger = userService.register("stranger@smarthome.local", "Stranger12345", "Stranger");
+        UserAccount owner = userService.register(OWNER_EMAIL, "Passw0rd123", "Owner");
+        UserAccount guest = userService.register("guest@example.com", "Passw0rd123", "Guest");
+        UserAccount stranger = userService.register("stranger@example.com", "Passw0rd123", "Stranger");
         Device lamp = deviceService.create("Seed Lamp", DeviceType.LAMP, owner.id());
         Device device = deviceRepository.findByIdWithAccesses(lamp.getId())
                 .orElseThrow(() -> new DeviceNotFoundException(lamp.getId()));

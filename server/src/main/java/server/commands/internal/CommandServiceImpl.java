@@ -71,6 +71,7 @@ class CommandServiceImpl implements CommandService {
     }
 
     @Override
+    @PreAuthorize("@deviceAccessChecker.isOwner(#deviceId, authentication)")
     public void update(UUID deviceId, UUID commandId, String argsSchema, RequiredRole requiredRole) {
         Command command = commandRepository.findByDeviceIdAndCommandId(deviceId, commandId).orElseThrow(() -> new CommandNotFoundException(deviceId, commandId));
 
@@ -80,6 +81,7 @@ class CommandServiceImpl implements CommandService {
     }
 
     @Override
+    @PreAuthorize("@deviceAccessChecker.isOwner(#deviceId, authentication)")
     public void delete(UUID deviceId, UUID commandId) {
         Command command = commandRepository.findByDeviceIdAndCommandId(deviceId, commandId).orElseThrow(() -> new CommandNotFoundException(deviceId, commandId));
         commandRepository.delete(command);
