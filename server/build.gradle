@@ -15,7 +15,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.modulith:spring-modulith-starter-core'
     implementation 'com.networknt:json-schema-validator:3.0.7'
@@ -33,6 +32,10 @@ dependencies {
     implementation 'org.springframework.modulith:spring-modulith-events-api'
     implementation project(':smarthome-spring-boot-starter')
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1'
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.86'
 }
 
 tasks.withType(Test).configureEach {

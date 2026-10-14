@@ -17,7 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private static final String BEARER_PREFIX = "Bearer";
+    private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtValidatorService jwtValidatorService;
     private final UserDetailsService userDetailsService;
@@ -44,22 +44,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            String token = authorizationHeader.substring(BEARER_PREFIX.length()).trim();
+            String token = authorizationHeader.substring(BEARER_PREFIX.length());
             String username = jwtValidatorService.extractUsername(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            if (!jwtValidatorService.isTokenValid(token, userDetails)) {
-                throw new BadCredentialsException("Invalid bearer token");
-            }
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (!jwtValidatorService.isTokenValid(token, userDetails)) {
+                    throw new BadCredentialsException("Невалідний або прострочений токен JWT");
+                }
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         } catch (JwtException | IllegalArgumentException | AuthenticationException exception) {
             SecurityContextHolder.clearContext();
             authenticationEntryPoint.commence(
                     request,
                     response,
-                    new BadCredentialsException("Invalid bearer token", exception));
+                    new BadCredentialsException("Невалідний або прострочений токен JWT", exception));
             return;
         }
 

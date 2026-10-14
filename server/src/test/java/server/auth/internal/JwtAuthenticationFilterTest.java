@@ -113,7 +113,7 @@ class JwtAuthenticationFilterTest {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/devices");
         request.addHeader("Authorization", "Bearer invalid");
         MockHttpServletResponse response = new MockHttpServletResponse();
-        when(jwtValidatorService.extractUsername("invalid")).thenThrow(new JwtException("Invalid token"));
+        when(jwtValidatorService.extractUsername("invalid")).thenThrow(new JwtException("Невалідний токен"));
         JwtAuthenticationFilter filter =
                 new JwtAuthenticationFilter(jwtValidatorService, userDetailsService, authenticationEntryPoint);
 
