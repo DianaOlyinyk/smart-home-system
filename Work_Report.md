@@ -105,3 +105,26 @@
     - Написав тести автоконфігурації через `ApplicationContextRunner`: бін є при `enabled=true`, відсутній при `enabled=false`, є за відсутності властивості, замінюється власним бінем, значення `sender` за замовчуванням
 
 # Звіт за 6 групове завдання
+- Малій Олександра:
+    - Підготувала розбиття завдання на issues із контрактами між ними та провела рев'ю PR команди: виправила українськими текстами повідомлення про помилки безпеки, усунула конфлікт `JwtValidatorService` у PR фільтра, переспрямувала PR на `main`
+    - Реалізувала JWT-сервіси на бібліотеці JJWT: `JwtService` (токен із `subject`, `roles`, `iat`, `exp`, підпис HMAC) і `JwtValidatorService` (перевірка підпису, терміну дії та користувача); секрет береться з `security.jwt.secret` зі змінної оточення `JWT_SECRET`, термін дії 15 хвилин
+    - Написала `JwtServiceTest`: валідний токен, підмінений payload, токен із чужим ключем, токен іншого користувача, прострочений токен, занадто короткий секрет
+    - Зібрала `SecurityFilterChain`: вимкнений CSRF, CORS, `SessionCreationPolicy.STATELESS`, обробники 401 і 403, відкриті шляхи (`POST /login`, `POST /users`, Swagger, `/v3/api-docs`, H2-консоль), решта запитів лише для автентифікованих; фільтри `JwtAuthenticationFilter` і `JwtLoginFilter` створюються через `new` у ланцюжку; додала бін `AuthenticationManager` та `@EnableMethodSecurity`
+    - Виправила `GlobalExceptionHandlerTest` (`addFilters = false`), який зламала безпека
+    - Пройшла сценарій перевірки: запит без токена дає 401, вхід повертає токен, запит із `Bearer` дає 200, гість без прав на пристрій отримує 403
+- Олійник Діана:
+    - Реалізувала `ProblemDetailAuthenticationEntryPoint` (401) та `ProblemDetailAccessDeniedHandler` (403): відповідь `application/problem+json` у UTF-8 з полями `status`, `title`, `detail`, `type`, `timestamp`, `path` на верхньому рівні
+    - Додала обробник `AccessDeniedException` у `GlobalExceptionHandler`, щоб відмова від `@PreAuthorize` повертала 403, а не 500
+    - Реалізувала `CorsConfig`: дозволений origin `http://localhost:3000`, методи `GET, POST, PUT, DELETE, PATCH, OPTIONS`, заголовки `Authorization` і `Content-Type`, без облікових даних, кеш preflight 1 година
+    - Реалізувала `JwtAuthenticationFilter` (`OncePerRequestFilter`): читає токен із заголовка `Authorization: Bearer`, перевіряє його, кладе користувача в `SecurityContextHolder`, а для недійсного токена очищає контекст і повертає 401 через `AuthenticationEntryPoint`
+    - Написала `ProblemDetailSecurityHandlersTest` та `JwtAuthenticationFilterTest` (запит без токена, інша схема авторизації, валідний токен, недійсний токен, налаштування CORS)
+- Забіяка Денис:
+    - Перейшов на Argon2id (`Argon2PasswordEncoder`, залежність BouncyCastle) і додав запис прикладу хешу в лог при старті
+    - Зробив `User` реалізацією `UserDetails` (логін це email, глобальних ролей немає) та створив `JpaUserDetailsService`, що шукає користувача через JPA-репозиторій і кидає `UsernameNotFoundException`
+    - Реалізував `JwtLoginFilter` на `POST /login`: читає облікові дані з тіла, перевіряє їх через `AuthenticationManager`, повертає `AuthResponse` (`accessToken`, `tokenType`, `expiresIn`), а невдалий вхід віддає як 401 через `AuthenticationEntryPoint`
+    - Перейменував ресурс входу з `/tokens` на `/login` у `TokenController` та його тесті
+    - Написав `JwtLoginFilterTest`: інші шляхи пропускаються, успішний вхід, неправильний пароль, пошкоджене тіло запиту
+- Мошенський Олег:
+    - Реалізував `SeedDataLoader` для тестових даних при старті: користувачі owner, guest і stranger, пристрій «Seed Lamp»; гостя додано до пристрою через `DeviceRepository`; повторне засівання пропускається, у лог виводиться id пристрою
+    - Реалізував авторизацію по пристрою: `DeviceAccessChecker` (бін `deviceAccessChecker`) з методом `isOwner`, який через `DeviceAccessRepository.existsByDeviceIdAndUser_IdAndRole` перевіряє роль `OWNER` на конкретному пристрої
+    - Додав `@PreAuthorize` на створення, зміну й видалення команд та на надання й відкликання доступів: власник дозволений, гість і користувач без доступу отримують 403
