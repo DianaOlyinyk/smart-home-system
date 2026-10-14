@@ -3,11 +3,18 @@
         "name": "Smart Home API",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            { "key": "token", "value": "{{accessToken}}", "type": "string" }
+        ]
+    },
     "item": [
         {
             "name": "Register user",
             "request": {
                 "method": "POST",
+                "auth": { "type": "noauth" },
                 "header": [
                     { "key": "Content-Type", "value": "application/json" }
                 ],
@@ -24,6 +31,33 @@
                         "exec": [
                             "pm.test(\"Статус 201\", () => { pm.response.to.have.status(201); });",
                             "pm.environment.set(\"userId\", pm.response.json().id);"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Log in",
+            "request": {
+                "method": "POST",
+                "auth": { "type": "noauth" },
+                "header": [
+                    { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"email\":\"{{email}}\",\"password\":\"Passw0rd123\"}"
+                },
+                "url": "{{baseUrl}}/login"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Статус 200\", () => { pm.response.to.have.status(200); });",
+                            "pm.test(\"Тип токена Bearer\", () => { pm.expect(pm.response.json().tokenType).to.eql(\"Bearer\"); });",
+                            "pm.environment.set(\"accessToken\", pm.response.json().accessToken);"
                         ]
                     }
                 }
