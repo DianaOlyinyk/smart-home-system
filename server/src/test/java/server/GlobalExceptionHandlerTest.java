@@ -72,7 +72,7 @@ class GlobalExceptionHandlerTest {
                 .handleAccessDenied(new AccessDeniedException("Access is denied"));
 
         assertEquals(403, problemDetail.getStatus());
-        assertEquals("Access Denied", problemDetail.getTitle());
-        assertEquals("Access is denied", problemDetail.getDetail());
+        assertEquals("Доступ заборонено", problemDetail.getTitle());
+        assertEquals("Недостатньо прав для виконання цієї операції.", problemDetail.getDetail());
     }
 }

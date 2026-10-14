@@ -36,7 +36,8 @@ class ProblemDetailSecurityHandlersTest {
 
         authenticationEntryPoint.commence(request, response, new BadCredentialsException("Authentication required"));
 
-        assertProblemResponse(response, 401, "Authentication Error", "Authentication required");
+        assertProblemResponse(response, 401, "Помилка автентифікації",
+                "Для доступу до ресурсу потрібна валідна автентифікація.");
     }
 
     @Test
@@ -46,7 +47,8 @@ class ProblemDetailSecurityHandlersTest {
 
         accessDeniedHandler.handle(request, response, new AccessDeniedException("Access is denied"));
 
-        assertProblemResponse(response, 403, "Access Denied", "Access is denied");
+        assertProblemResponse(response, 403, "Доступ заборонено",
+                "Недостатньо прав для виконання цієї операції.");
     }
 
     private void assertProblemResponse(MockHttpServletResponse response, int status, String title, String detail)
@@ -56,12 +58,12 @@ class ProblemDetailSecurityHandlersTest {
         assertEquals("UTF-8", response.getCharacterEncoding());
 
         JsonNode body = objectMapper.readTree(response.getContentAsByteArray());
-        assertNotNull(body.get("status"), "status must be a top-level property");
-        assertNotNull(body.get("title"), "title must be a top-level property");
-        assertNotNull(body.get("detail"), "detail must be a top-level property");
-        assertNotNull(body.get("type"), "type must be a top-level property");
-        assertNotNull(body.get("timestamp"), "timestamp must be a top-level property");
-        assertNotNull(body.get("path"), "path must be a top-level property");
+        assertNotNull(body.get("status"), "Поле status має бути на верхньому рівні");
+        assertNotNull(body.get("title"), "Поле title має бути на верхньому рівні");
+        assertNotNull(body.get("detail"), "Поле detail має бути на верхньому рівні");
+        assertNotNull(body.get("type"), "Поле type має бути на верхньому рівні");
+        assertNotNull(body.get("timestamp"), "Поле timestamp має бути на верхньому рівні");
+        assertNotNull(body.get("path"), "Поле path має бути на верхньому рівні");
         assertEquals(status, body.get("status").asInt());
         assertEquals(title, body.get("title").asString());
         assertEquals(detail, body.get("detail").asString());

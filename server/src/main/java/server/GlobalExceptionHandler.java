@@ -156,7 +156,8 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     ProblemDetail handleAccessDenied(AccessDeniedException ex) {
-        return problemDetail(HttpStatus.FORBIDDEN, "Access Denied", ex.getMessage(), ex);
+        return problemDetail(HttpStatus.FORBIDDEN, "Доступ заборонено",
+                "Недостатньо прав для виконання цієї операції.", ex);
     }
 
     @ExceptionHandler(CommandAlreadyExistsException.class)

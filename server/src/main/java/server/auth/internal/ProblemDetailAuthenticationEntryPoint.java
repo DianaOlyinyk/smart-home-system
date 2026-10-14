@@ -30,8 +30,8 @@ public class ProblemDetailAuthenticationEntryPoint implements AuthenticationEntr
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) throws IOException, ServletException {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED,
-                authException.getMessage());
-        problemDetail.setTitle("Authentication Error");
+                "Для доступу до ресурсу потрібна валідна автентифікація.");
+        problemDetail.setTitle("Помилка автентифікації");
         problemDetail.setType(TYPE);
         problemDetail.setProperty("timestamp", Instant.now());
         problemDetail.setProperty("path", request.getRequestURI());

@@ -30,8 +30,8 @@ public class ProblemDetailAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response,
             AccessDeniedException accessDeniedException) throws IOException, ServletException {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN,
-                accessDeniedException.getMessage());
-        problemDetail.setTitle("Access Denied");
+                "Недостатньо прав для виконання цієї операції.");
+        problemDetail.setTitle("Доступ заборонено");
         problemDetail.setType(TYPE);
         problemDetail.setProperty("timestamp", Instant.now());
         problemDetail.setProperty("path", request.getRequestURI());
