@@ -1,5 +1,5 @@
 package server.commands.internal;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import server.commands.Command;
@@ -30,6 +30,7 @@ class CommandServiceImpl implements CommandService {
     }
 
     @Override
+    @PreAuthorize("@deviceAccessChecker.isOwner(#deviceId, authentication)")
     public Command create(UUID deviceId, String name, String argsSchema, RequiredRole requiredRole) {
         var device = deviceService.findById(deviceId);
         if (commandRepository.existsByDeviceIdAndName(deviceId, name)) {
@@ -70,6 +71,7 @@ class CommandServiceImpl implements CommandService {
     }
 
     @Override
+    @PreAuthorize("@deviceAccessChecker.isOwner(#deviceId, authentication)")
     public void update(UUID deviceId, UUID commandId, String argsSchema, RequiredRole requiredRole) {
         Command command = commandRepository.findByDeviceIdAndCommandId(deviceId, commandId).orElseThrow(() -> new CommandNotFoundException(deviceId, commandId));
 
@@ -79,6 +81,7 @@ class CommandServiceImpl implements CommandService {
     }
 
     @Override
+    @PreAuthorize("@deviceAccessChecker.isOwner(#deviceId, authentication)")
     public void delete(UUID deviceId, UUID commandId) {
         Command command = commandRepository.findByDeviceIdAndCommandId(deviceId, commandId).orElseThrow(() -> new CommandNotFoundException(deviceId, commandId));
         commandRepository.delete(command);

@@ -14,10 +14,11 @@ import server.users.UserService;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @Service
 @Transactional
-class DeviceAccessService {
+public class DeviceAccessService {
 
     private final DeviceRepository deviceRepository;
     private final DeviceAccessRepository accessRepository;
@@ -32,7 +33,8 @@ class DeviceAccessService {
         this.userService = userService;
     }
 
-    DeviceAccess grant(
+    @PreAuthorize("@deviceAccessChecker.isOwner(#deviceId, authentication)")
+    public DeviceAccess grant(
             UUID deviceId,
             String email,
             AccessRole role,
@@ -45,16 +47,13 @@ class DeviceAccessService {
                 deviceId, targetUser.getId())) {
             throw new AccessAlreadyGrantedException();
         }
-
         User grantedBy = userService.getUser(grantedById);
-
         device.grantAccess(
                 targetUser,
                 role,
                 grantedBy,
                 Instant.now()
         );
-
         Device saved = deviceRepository.save(device);
         return saved.getAccesses().stream()
                 .filter(access ->
@@ -63,7 +62,8 @@ class DeviceAccessService {
                 .orElseThrow();
     }
 
-    void revoke(UUID deviceId, UUID userId) {
+    @PreAuthorize("@deviceAccessChecker.isOwner(#deviceId, authentication)")
+    public void revoke(UUID deviceId, UUID userId) {
         Device device = deviceRepository.findByIdWithAccesses(deviceId)
                 .orElseThrow(() -> new DeviceNotFoundException(deviceId));
         boolean removed = device.revokeAccess(userId);
