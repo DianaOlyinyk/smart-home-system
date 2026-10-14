@@ -103,3 +103,5 @@
     - Додав типізовані налаштування `NotificationProperties` (Java Record, `@ConfigurationProperties`, `@Validated`, `@NotBlank` для `sender`)
     - Налаштував ієрархію налаштувань і профілі середовищ: базове значення в `application.properties`, перекриття в `application-dev.properties` та `application-prod.properties`
     - Написав тести автоконфігурації через `ApplicationContextRunner`: бін є при `enabled=true`, відсутній при `enabled=false`, є за відсутності властивості, замінюється власним бінем, значення `sender` за замовчуванням
+
+# Звіт за 6 групове завдання
