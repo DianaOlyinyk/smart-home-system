@@ -17,7 +17,7 @@ import server.auth.IssuedToken;
 
 @RestController
 @Tag(name = "Автентифікація", description = "Вхід у систему та отримання токена")
-@RequestMapping("/tokens")
+@RequestMapping("/login")
 class TokenController {
 
     private final AuthService authService;
