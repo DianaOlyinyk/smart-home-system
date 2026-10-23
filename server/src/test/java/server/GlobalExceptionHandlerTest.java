@@ -26,7 +26,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void validationErrorUsesProjectFormatWithFieldErrors() throws Exception {
-        mockMvc.perform(post("/devices")
+        mockMvc.perform(post("/api/devices")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"type\":\"LAMP\"}"))
                 .andExpect(status().isBadRequest())
@@ -36,7 +36,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void unreadableBodyUsesProjectFormat() throws Exception {
-        mockMvc.perform(post("/devices")
+        mockMvc.perform(post("/api/devices")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{not json"))
                 .andExpect(status().isBadRequest())
@@ -45,7 +45,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void typeMismatchNamesTheParameter() throws Exception {
-        mockMvc.perform(get("/devices").param("type", "SPACESHIP"))
+        mockMvc.perform(get("/api/devices").param("type", "SPACESHIP"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Некоректний параметр запиту"))
                 .andExpect(jsonPath("$.detail").value("Параметр 'type' має неправильний формат"));
@@ -60,7 +60,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void unsupportedMethodUsesProjectFormatAndKeepsAllowHeader() throws Exception {
-        mockMvc.perform(delete("/devices"))
+        mockMvc.perform(delete("/api/devices"))
                 .andExpect(status().isMethodNotAllowed())
                 .andExpect(header().exists("Allow"))
                 .andExpect(jsonPath("$.title").value("Метод не підтримується"));

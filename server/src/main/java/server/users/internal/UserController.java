@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.users.UserAccount;
 import server.users.UserService;
+import server.ApiPaths;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -36,7 +37,7 @@ class UserController {
     ResponseEntity<UserResponse> register(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Дані для реєстрації нового користувача") @Valid @RequestBody CreateUserRequest request) {
         UserAccount account = userService.register(request.email(), request.password(), request.name());
-        return ResponseEntity.created(URI.create("/users/" + account.id()))
+        return ResponseEntity.created(URI.create(ApiPaths.PREFIX + "/users/" + account.id()))
                 .body(UserResponse.from(account));
     }
 

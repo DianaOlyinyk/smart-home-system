@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import server.ApiPaths;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
@@ -33,7 +34,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         this.objectMapper = objectMapper;
 
         setRequiresAuthenticationRequestMatcher(
-                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/login"));
+                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, ApiPaths.LOGIN));
 
         setAuthenticationFailureHandler((request, response, exception) ->
                 authenticationEntryPoint.commence(request, response, exception));

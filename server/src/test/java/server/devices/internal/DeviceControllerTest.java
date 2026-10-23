@@ -51,7 +51,7 @@ class DeviceControllerTest {
         when(deviceService.create(eq("Лампа"), eq(DeviceType.LAMP), isNull()))
                 .thenReturn(device);
 
-        mockMvc.perform(post("/devices")
+        mockMvc.perform(post("/api/devices")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -60,7 +60,7 @@ class DeviceControllerTest {
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/devices/" + id))
+                .andExpect(header().string("Location", "/api/devices/" + id))
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(jsonPath("$.name").value("Лампа"))
                 .andExpect(jsonPath("$.type").value("LAMP"))
@@ -69,7 +69,7 @@ class DeviceControllerTest {
 
     @Test
     void createDeviceReturns400WhenNameIsBlank() throws Exception {
-        mockMvc.perform(post("/devices")
+        mockMvc.perform(post("/api/devices")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -82,7 +82,7 @@ class DeviceControllerTest {
 
     @Test
     void createDeviceReturns400WhenTypeIsUnknown() throws Exception {
-        mockMvc.perform(post("/devices")
+        mockMvc.perform(post("/api/devices")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -95,7 +95,7 @@ class DeviceControllerTest {
 
     @Test
     void createDeviceReturns400WhenNameIsWhitespaceOnly() throws Exception {
-        mockMvc.perform(post("/devices")
+        mockMvc.perform(post("/api/devices")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -108,7 +108,7 @@ class DeviceControllerTest {
 
     @Test
     void createDeviceReturns400WhenTypeIsMissing() throws Exception {
-        mockMvc.perform(post("/devices")
+        mockMvc.perform(post("/api/devices")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -124,7 +124,7 @@ class DeviceControllerTest {
         Device device = device(UUID.randomUUID(), "Лампа", DeviceType.LAMP);
         when(deviceService.create("Лампа", DeviceType.LAMP, userId)).thenReturn(device);
 
-        mockMvc.perform(post("/devices")
+        mockMvc.perform(post("/api/devices")
                         .header("X-User-Id", userId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -140,7 +140,7 @@ class DeviceControllerTest {
 
     @Test
     void createDeviceReturns400WhenUserHeaderIsNotUuid() throws Exception {
-        mockMvc.perform(post("/devices")
+        mockMvc.perform(post("/api/devices")
                         .header("X-User-Id", "not-a-uuid")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -158,7 +158,7 @@ class DeviceControllerTest {
         Device kettle = device(UUID.randomUUID(), "Чайник", DeviceType.KETTLE);
         when(deviceService.findAll(null)).thenReturn(List.of(lamp, kettle));
 
-        mockMvc.perform(get("/devices"))
+        mockMvc.perform(get("/api/devices"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].name").value("Лампа"))
@@ -170,7 +170,7 @@ class DeviceControllerTest {
         Device lamp = device(UUID.randomUUID(), "Лампа", DeviceType.LAMP);
         when(deviceService.findAll(DeviceType.LAMP)).thenReturn(List.of(lamp));
 
-        mockMvc.perform(get("/devices").param("type", "LAMP"))
+        mockMvc.perform(get("/api/devices").param("type", "LAMP"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].type").value("LAMP"));
@@ -178,7 +178,7 @@ class DeviceControllerTest {
 
     @Test
     void findAllReturns400WhenTypeIsUnknown() throws Exception {
-        mockMvc.perform(get("/devices").param("type", "TOASTER"))
+        mockMvc.perform(get("/api/devices").param("type", "TOASTER"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -193,7 +193,7 @@ class DeviceControllerTest {
         device.grantAccess(owner, AccessRole.OWNER, owner, now);
         when(deviceService.getWithAccesses(id)).thenReturn(device);
 
-        mockMvc.perform(get("/devices/{id}", id))
+        mockMvc.perform(get("/api/devices/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(jsonPath("$.accesses.length()").value(1))
@@ -206,7 +206,7 @@ class DeviceControllerTest {
         UUID id = UUID.randomUUID();
         when(deviceService.getWithAccesses(id)).thenThrow(new DeviceNotFoundException(id));
 
-        mockMvc.perform(get("/devices/{id}", id))
+        mockMvc.perform(get("/api/devices/{id}", id))
                 .andExpect(status().isNotFound());
     }
 
@@ -215,7 +215,7 @@ class DeviceControllerTest {
         UUID id = UUID.randomUUID();
         when(deviceService.rename(id, "Нова лампа")).thenReturn(device(id, "Нова лампа", DeviceType.LAMP));
 
-        mockMvc.perform(put("/devices/{id}", id)
+        mockMvc.perform(put("/api/devices/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -228,7 +228,7 @@ class DeviceControllerTest {
 
     @Test
     void renameReturns400WhenNameIsBlank() throws Exception {
-        mockMvc.perform(put("/devices/{id}", UUID.randomUUID())
+        mockMvc.perform(put("/api/devices/{id}", UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -243,7 +243,7 @@ class DeviceControllerTest {
         UUID id = UUID.randomUUID();
         when(deviceService.rename(id, "Нова лампа")).thenThrow(new DeviceNotFoundException(id));
 
-        mockMvc.perform(put("/devices/{id}", id)
+        mockMvc.perform(put("/api/devices/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -257,7 +257,7 @@ class DeviceControllerTest {
     void deleteReturns204() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mockMvc.perform(delete("/devices/{id}", id))
+        mockMvc.perform(delete("/api/devices/{id}", id))
                 .andExpect(status().isNoContent());
 
         verify(deviceService).delete(id);
@@ -268,7 +268,7 @@ class DeviceControllerTest {
         UUID id = UUID.randomUUID();
         doThrow(new DeviceNotFoundException(id)).when(deviceService).delete(id);
 
-        mockMvc.perform(delete("/devices/{id}", id))
+        mockMvc.perform(delete("/api/devices/{id}", id))
                 .andExpect(status().isNotFound());
     }
 

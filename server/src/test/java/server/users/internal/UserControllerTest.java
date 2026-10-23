@@ -41,7 +41,7 @@ class UserControllerTest {
         when(userService.register(anyString(), anyString(), anyString()))
                 .thenReturn(new UserAccount(id, "user@example.com", "Іван", createdAt));
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -51,7 +51,7 @@ class UserControllerTest {
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/users/" + id))
+                .andExpect(header().string("Location", "/api/users/" + id))
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(jsonPath("$.email").value("user@example.com"))
                 .andExpect(jsonPath("$.name").value("Іван"));
@@ -59,7 +59,7 @@ class UserControllerTest {
 
     @Test
     void createUserReturns400WhenRequestIsInvalid() throws Exception {
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -76,7 +76,7 @@ class UserControllerTest {
         UUID id = UUID.randomUUID();
         when(userService.findById(any())).thenThrow(new UserNotFoundException(id));
 
-        mockMvc.perform(get("/users/{id}", id))
+        mockMvc.perform(get("/api/users/{id}", id))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", "application/problem+json"))
                 .andExpect(jsonPath("$.status").value(404))
@@ -89,7 +89,7 @@ class UserControllerTest {
         var account = new UserAccount(id, "olena@example.com", "Олена", Instant.parse("2025-11-02T09:15:00Z"));
         when(userService.findById(id)).thenReturn(account);
 
-        mockMvc.perform(get("/users/{id}", id))
+        mockMvc.perform(get("/api/users/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("olena@example.com"))
                 .andExpect(jsonPath("$.name").value("Олена"));
@@ -104,7 +104,7 @@ class UserControllerTest {
                 {"email": "olena@example.com", "password": "qwerty123", "name": "Олена"}
                 """;
 
-        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON).content(body))
+        mockMvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.title").value("Користувач з такою поштою вже існує"));
     }
@@ -115,7 +115,7 @@ class UserControllerTest {
                 {"email": "olena@example.com", "password": "qwerty123", "name": "Олена", "isAdmin": true}
                 """;
 
-        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON).content(body))
+        mockMvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isBadRequest());
     }
 }

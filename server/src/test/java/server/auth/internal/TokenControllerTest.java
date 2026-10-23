@@ -35,7 +35,7 @@ class TokenControllerTest {
         when(authService.login("nazar@example.com", "pass1234"))
                 .thenReturn(new IssuedToken("abc.def.ghi", ownerId));
 
-        mvc.perform(post("/login")
+        mvc.perform(post("/api/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\": \"nazar@example.com\", \"password\": \"pass1234\"}"))
                 .andExpect(status().isOk())
@@ -47,7 +47,7 @@ class TokenControllerTest {
     void wrongPasswordGivesUnauthorized() throws Exception {
         when(authService.login(anyString(), anyString())).thenThrow(new InvalidCredentialsException());
 
-        mvc.perform(post("/login")
+        mvc.perform(post("/api/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\": \"nazar@example.com\", \"password\": \"wrong\"}"))
                 .andExpect(status().isUnauthorized())
@@ -56,7 +56,7 @@ class TokenControllerTest {
 
     @Test
     void blankCredentialsAreRejectedBeforeReachingTheService() throws Exception {
-        mvc.perform(post("/login")
+        mvc.perform(post("/api/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\": \"\", \"password\": \"\"}"))
                 .andExpect(status().isBadRequest());

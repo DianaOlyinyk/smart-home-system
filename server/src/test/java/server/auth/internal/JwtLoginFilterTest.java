@@ -43,7 +43,7 @@ class JwtLoginFilterTest {
 
     @Test
     void requestToAnotherPathPassesThroughUnchanged() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/devices");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/devices");
         MockHttpServletResponse response = new MockHttpServletResponse();
         JwtLoginFilter filter =
                 new JwtLoginFilter(authenticationManager, jwtService, objectMapper, authenticationEntryPoint);
@@ -116,7 +116,7 @@ class JwtLoginFilterTest {
     }
 
     private MockHttpServletRequest loginRequest(String json) {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/login");
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/login");
         request.setContentType("application/json");
         request.setContent(json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         return request;

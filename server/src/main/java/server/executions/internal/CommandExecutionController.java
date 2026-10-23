@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import server.executions.CommandExecution;
 import server.executions.CommandExecutionService;
 
+import server.ApiPaths;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -50,7 +51,7 @@ class CommandExecutionController {
             @Parameter(description = "Тимчасова ідентифікація користувача (UUID) до впровадження Security; необов'язковий", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6") @RequestHeader(name = "X-User-Id", required = false) UUID userId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Аргументи виконання команди згідно з її схемою") @Valid @RequestBody ExecuteCommandRequest request) {
         CommandExecution execution = commandExecutionService.execute(deviceId, commandId, userId, request.args());
-        URI location = URI.create("/devices/" + deviceId + "/executions/" + execution.getId());
+        URI location = URI.create(ApiPaths.PREFIX + "/devices/" + deviceId + "/executions/" + execution.getId());
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .location(location)
                 .body(CommandExecutionResponse.from(execution));

@@ -46,13 +46,13 @@ class CommandControllerTest {
         ReflectionTestUtils.setField(command, "id", commandId);
         when(commandService.create(eq(deviceId), eq("set_brightness"), eq("{}"), eq(RequiredRole.GUEST)))
             .thenReturn(command);
-        mockMvc.perform(post("/devices/{deviceId}/commands", deviceId)
+        mockMvc.perform(post("/api/devices/{deviceId}/commands", deviceId)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                     {"name": "set_brightness", "argsSchema": "{}", "requiredRole": "GUEST"}
                     """))
             .andExpect(status().isCreated())
-            .andExpect(header().string("Location", "/devices/" + deviceId + "/commands/" + commandId))
+            .andExpect(header().string("Location", "/api/devices/" + deviceId + "/commands/" + commandId))
             .andExpect(jsonPath("$.deviceId").value(deviceId.toString()))
             .andExpect(jsonPath("$.name").value("set_brightness"))
             .andExpect(jsonPath("$.requiredRole").value("GUEST"));
@@ -62,7 +62,7 @@ class CommandControllerTest {
         UUID deviceId = UUID.randomUUID();
         when(commandService.create(eq(deviceId), anyString(), anyString(), any(RequiredRole.class)))
         .thenThrow(new DeviceNotFoundException(deviceId));
-        mockMvc.perform(post("/devices/{deviceId}/commands", deviceId)
+        mockMvc.perform(post("/api/devices/{deviceId}/commands", deviceId)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                     {"name": "turn_on", "argsSchema": "{}", "requiredRole": "GUEST"}
@@ -73,7 +73,7 @@ class CommandControllerTest {
     @Test
     void createCommandReturns400WhenNameIsBlank() throws Exception {
         UUID deviceId = UUID.randomUUID();
-        mockMvc.perform(post("/devices/{deviceId}/commands", deviceId)
+        mockMvc.perform(post("/api/devices/{deviceId}/commands", deviceId)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                     {"name": "", "argsSchema": "{}", "requiredRole": "GUEST"}
@@ -83,7 +83,7 @@ class CommandControllerTest {
     @Test
     void createCommandReturns400WhenRequiredRoleIsMissing() throws Exception {
         UUID deviceId = UUID.randomUUID();
-        mockMvc.perform(post("/devices/{deviceId}/commands", deviceId)
+        mockMvc.perform(post("/api/devices/{deviceId}/commands", deviceId)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                     {"name": "turn_on", "argsSchema": "{}"}
@@ -95,7 +95,7 @@ class CommandControllerTest {
         UUID deviceId = UUID.randomUUID();
         when(commandService.create(eq(deviceId), eq("turn_on"), anyString(), any(RequiredRole.class)))
             .thenThrow(new CommandAlreadyExistsException(deviceId, "turn_on"));
-        mockMvc.perform(post("/devices/{deviceId}/commands", deviceId)
+        mockMvc.perform(post("/api/devices/{deviceId}/commands", deviceId)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                     {"name": "turn_on", "argsSchema": "{}", "requiredRole": "GUEST"}
@@ -110,7 +110,7 @@ class CommandControllerTest {
         when(commandService.findAllByDevice(deviceId, null)).thenReturn(List.of(
             new Command(device(deviceId), "set_brightness", "{}", RequiredRole.OWNER, now),
             new Command(device(deviceId), "turn_on", "{}", RequiredRole.GUEST, now)));
-        mockMvc.perform(get("/devices/{deviceId}/commands", deviceId))
+        mockMvc.perform(get("/api/devices/{deviceId}/commands", deviceId))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(2))
             .andExpect(jsonPath("$[0].name").value("set_brightness"))
@@ -121,7 +121,7 @@ class CommandControllerTest {
         UUID deviceId = UUID.randomUUID();
         when(commandService.findAllByDevice(deviceId, RequiredRole.OWNER)).thenReturn(List.of(
             new Command(device(deviceId), "set_mode", "{}", RequiredRole.OWNER, Instant.now())));
-        mockMvc.perform(get("/devices/{deviceId}/commands", deviceId).param("requiredRole", "OWNER"))
+        mockMvc.perform(get("/api/devices/{deviceId}/commands", deviceId).param("requiredRole", "OWNER"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(1))
             .andExpect(jsonPath("$[0].requiredRole").value("OWNER"));
@@ -130,14 +130,14 @@ class CommandControllerTest {
     void listCommandsReturns404WhenDeviceIsMissing() throws Exception {
         UUID deviceId = UUID.randomUUID();
         when(commandService.findAllByDevice(deviceId, null)).thenThrow(new DeviceNotFoundException(deviceId));
-        mockMvc.perform(get("/devices/{deviceId}/commands", deviceId))
+        mockMvc.perform(get("/api/devices/{deviceId}/commands", deviceId))
             .andExpect(status().isNotFound());
     }
     @Test
     void updateCommandReturns204() throws Exception {
         UUID deviceId = UUID.randomUUID();
         UUID commandId = UUID.randomUUID();
-        mockMvc.perform(put("/devices/{deviceId}/commands/{commandId}", deviceId, commandId)
+        mockMvc.perform(put("/api/devices/{deviceId}/commands/{commandId}", deviceId, commandId)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                     {"argsSchema": "{}", "requiredRole": "OWNER"}
@@ -151,7 +151,7 @@ class CommandControllerTest {
         UUID commandId = UUID.randomUUID();
         doThrow(new CommandNotFoundException(deviceId, commandId))
             .when(commandService).update(deviceId, commandId, "{}", RequiredRole.OWNER);
-        mockMvc.perform(put("/devices/{deviceId}/commands/{commandId}", deviceId, commandId)
+        mockMvc.perform(put("/api/devices/{deviceId}/commands/{commandId}", deviceId, commandId)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                     {"argsSchema": "{}", "requiredRole": "OWNER"}
@@ -160,7 +160,7 @@ class CommandControllerTest {
     }
     @Test
     void updateCommandReturns400WhenRequiredRoleIsMissing() throws Exception {
-        mockMvc.perform(put("/devices/{deviceId}/commands/{commandId}", UUID.randomUUID(), UUID.randomUUID())
+        mockMvc.perform(put("/api/devices/{deviceId}/commands/{commandId}", UUID.randomUUID(), UUID.randomUUID())
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                     {"argsSchema": "{}"}
@@ -171,7 +171,7 @@ class CommandControllerTest {
     void deleteCommandReturns204() throws Exception {
         UUID deviceId = UUID.randomUUID();
         UUID commandId = UUID.randomUUID();
-        mockMvc.perform(delete("/devices/{deviceId}/commands/{commandId}", deviceId, commandId))
+        mockMvc.perform(delete("/api/devices/{deviceId}/commands/{commandId}", deviceId, commandId))
             .andExpect(status().isNoContent());
         verify(commandService).delete(deviceId, commandId);
     }
@@ -181,7 +181,7 @@ class CommandControllerTest {
         UUID commandId = UUID.randomUUID();
         doThrow(new CommandNotFoundException(deviceId, commandId))
             .when(commandService).delete(deviceId, commandId);
-        mockMvc.perform(delete("/devices/{deviceId}/commands/{commandId}", deviceId, commandId))
+        mockMvc.perform(delete("/api/devices/{deviceId}/commands/{commandId}", deviceId, commandId))
             .andExpect(status().isNotFound());
     }
     private static Device device(UUID id) {
