@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="uk" th:fragment="layout(title, content)">
+<head th:replace="~{fragments/layout :: siteHead(${title})}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: siteHeader}"></header>
+    <div class="page container">
+        <main th:replace="${content}"></main>
+    </div>
+    <footer th:replace="~{fragments/layout :: siteFooter}"></footer>
+</body>
+</html>
+
+<head th:fragment="siteHead(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:replace="${title}">Smart Home</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+
+<header class="site-header" th:fragment="siteHeader">
+    <div class="site-header__inner">
+        <a class="site-header__brand" th:href="@{/devices}">Smart Home</a>
+        <div class="site-header__user" sec:authorize="isAuthenticated()">
+            <span sec:authentication="name">user@example.com</span>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-sm">Вийти</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<footer class="site-footer" th:fragment="siteFooter">Smart Home System</footer>

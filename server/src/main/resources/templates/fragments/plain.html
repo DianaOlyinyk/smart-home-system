@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk" th:fragment="plain(title, content)">
+<head th:replace="~{fragments/layout :: siteHead(${title})}"></head>
+<body>
+    <div class="page container">
+        <main th:replace="${content}"></main>
+    </div>
+</body>
+</html>
