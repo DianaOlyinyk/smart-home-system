@@ -189,6 +189,7 @@
 ## 10. Сторінки (Thymeleaf)
 
 Спільний каркас: `templates/fragments/layout.html` (`layout(title, content)`: шапка з іменем користувача та виходом через POST, підвал) і `templates/fragments/plain.html` (`plain(title, content)`: без шапки й підвалу, для сторінки входу). Окремі CSS-файли для сторінок не створюються, усі сторінки використовують глобальний `static/css/app.css`. Посилання на файли пишуться через `th:href="@{...}"`, тоді до імені автоматично додається хеш вмісту. CSP забороняє inline-стилі та скрипти.
+Сторінка входу доступна за `GET /login`; її view реєструється у `server.web.WebMvcConfiguration`.
 
 Нова сторінка (`templates/<розділ>/<назва>.html`):
 

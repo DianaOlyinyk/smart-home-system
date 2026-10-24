@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Доступ заборонено — Smart Home</title>
+</head>
+<body>
+    <main class="error-page">
+        <p class="error-page__code">403</p>
+        <h1>Доступ заборонено</h1>
+        <p>У вас немає прав для виконання цієї дії.</p>
+        <a class="btn" th:href="@{/devices}">До пристроїв</a>
+    </main>
+</body>
+</html>
