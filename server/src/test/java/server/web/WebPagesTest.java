@@ -7,8 +7,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import server.devices.Device;
+import server.devices.DeviceService;
+import server.devices.DeviceType;
+import server.users.UserService;
+
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -19,6 +27,12 @@ class WebPagesTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private DeviceService deviceService;
+
+    @Autowired
+    private UserService userService;
 
     @Test
     void loginPageIsAvailableAndShowsLoginError() throws Exception {
@@ -84,5 +98,85 @@ class WebPagesTest {
         mockMvc.perform(get("/error").accept(MediaType.TEXT_HTML))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string(containsString("error-page__code\">500<")));
+    }
+
+    @Test
+    void ownerCanViewDeviceAndCommandForm() throws Exception {
+        Device device = seedDevice();
+
+        mockMvc.perform(get("/devices/{id}", device.getId())
+                        .with(user(userService.getUserByEmail("owner@example.com"))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(device.getName())))
+                .andExpect(content().string(containsString("Додати команду")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        containsString(device.getConnectionToken()))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        containsString("not-displayed"))));
+    }
+
+    @Test
+    void guestCanViewDeviceButNotCommandForm() throws Exception {
+        Device device = seedDevice();
+
+        mockMvc.perform(get("/devices/{id}", device.getId())
+                        .with(user(userService.getUserByEmail("guest@example.com"))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(device.getName())))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        containsString("Add command"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        containsString("Додати команду"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        containsString(device.getConnectionToken()))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        containsString("not-displayed"))));
+    }
+
+    @Test
+    void guestCannotPostCommandDirectly() throws Exception {
+        Device device = seedDevice();
+        var guest = userService.getUserByEmail("guest@example.com");
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .post("/devices/{id}/commands", device.getId())
+                        .with(user(guest))
+                        .with(csrf())
+                        .param("name", "")
+                        .param("argsSchema", "{}")
+                        .param("requiredRole", "GUEST"))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .post("/devices/{id}/commands", device.getId())
+                        .with(user(guest))
+                        .with(csrf())
+                        .param("name", "guest_command")
+                        .param("argsSchema", "{}")
+                        .param("requiredRole", "GUEST"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void foreignAndMissingDevicesReturnNotFound() throws Exception {
+        Device foreignDevice = deviceService.create(
+                "Foreign device",
+                DeviceType.LAMP,
+                userService.getUserByEmail("stranger@example.com").getId());
+
+        mockMvc.perform(get("/devices/{id}", foreignDevice.getId())
+                        .with(user(userService.getUserByEmail("guest@example.com"))))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/devices/{id}", UUID.randomUUID())
+                        .with(user(userService.getUserByEmail("guest@example.com"))))
+                .andExpect(status().isNotFound());
+    }
+
+    private Device seedDevice() {
+        return deviceService.findAll(null).stream()
+                .filter(device -> "Seed Lamp".equals(device.getName()))
+                .findFirst()
+                .orElseThrow();
     }
 }

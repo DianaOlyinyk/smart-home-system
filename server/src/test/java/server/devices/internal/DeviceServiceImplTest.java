@@ -122,6 +122,19 @@ class DeviceServiceImplTest {
 	}
 
 	@Test
+	void findsAccessRoleForUserAndDevice() {
+		UUID deviceId = UUID.randomUUID();
+		UUID userId = UUID.randomUUID();
+		Device device = new Device("Lamp", DeviceType.LAMP, "token", NOW);
+		ReflectionTestUtils.setField(device, "id", deviceId);
+		User user = userWithId(userId);
+		DeviceAccess access = new DeviceAccess(device, user, AccessRole.GUEST, user, NOW);
+		when(deviceAccessRepository.findAllByUserIdWithDevice(userId)).thenReturn(List.of(access));
+
+		assertEquals(Optional.of(AccessRole.GUEST), deviceService.findRole(deviceId, userId));
+	}
+
+	@Test
 	void findAllWithoutTypeLoadsAllDevicesWithAccesses() {
 		List<Device> devices = List.of(new Device("Kettle", DeviceType.KETTLE, "token", NOW));
 		when(deviceRepository.findAllWithAccesses()).thenReturn(devices);

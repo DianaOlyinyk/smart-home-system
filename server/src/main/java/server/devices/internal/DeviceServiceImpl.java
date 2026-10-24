@@ -87,6 +87,7 @@ class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<AccessRole> findRole(UUID deviceId, UUID userId) {
         return deviceAccessRepository.findAllByUserIdWithDevice(userId).stream()
                 .filter(access -> access.getDevice().getId().equals(deviceId))

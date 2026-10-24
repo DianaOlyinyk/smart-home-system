@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Пристрій — Smart Home</title>
+</head>
+<body>
+    <main>
+        <a class="back-link" th:href="@{/devices}">← До пристроїв</a>
+        <section class="card">
+            <div class="page-header">
+                <h1 th:text="${device.name}">Назва пристрою</h1>
+                <span class="badge" th:text="${device.type}">Тип пристрою</span>
+            </div>
+            <dl class="details">
+                <dt>Тип</dt>
+                <dd th:text="${device.type}">Тип пристрою</dd>
+                <dt>Створено</dt>
+                <dd th:text="${device.createdAt}">Дата створення</dd>
+            </dl>
+        </section>
+
+        <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}">
+            Команду додано.
+        </div>
+
+        <section class="card">
+            <h2>Команди</h2>
+            <ul class="list" th:if="${!commands.isEmpty()}">
+                <li class="list-item" th:each="command : ${commands}">
+                    <div>
+                        <div class="list-item__title" th:text="${command.name}">Назва команди</div>
+                        <div class="small muted">
+                            Доступ: <span th:text="${command.requiredRole}">GUEST</span>
+                        </div>
+                        <div class="small muted">
+                            Схема аргументів: <code th:text="${command.argsSchema}">{}</code>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <p class="empty" th:if="${commands.isEmpty()}">Для цього пристрою ще немає команд.</p>
+        </section>
+
+        <section class="card" th:if="${isOwner}">
+            <h2>Додати команду</h2>
+            <form th:action="@{/devices/{id}/commands(id=${device.id})}"
+                  th:object="${commandForm}" method="post">
+                <div class="field" th:classappend="${#fields.hasErrors('name')} ? 'has-error'">
+                    <label for="name">Назва</label>
+                    <input id="name" th:field="*{name}" required>
+                    <p class="field-error" th:errors="*{name}"></p>
+                </div>
+                <div class="field" th:classappend="${#fields.hasErrors('argsSchema')} ? 'has-error'">
+                    <label for="argsSchema">Схема аргументів (JSON)</label>
+                    <textarea id="argsSchema" th:field="*{argsSchema}" required></textarea>
+                    <p class="field-error" th:errors="*{argsSchema}"></p>
+                </div>
+                <div class="field" th:classappend="${#fields.hasErrors('requiredRole')} ? 'has-error'">
+                    <label for="requiredRole">Доступна роль</label>
+                    <select id="requiredRole" th:field="*{requiredRole}" required>
+                        <option value="OWNER">OWNER</option>
+                        <option value="GUEST">GUEST</option>
+                    </select>
+                    <p class="field-error" th:errors="*{requiredRole}"></p>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Додати команду</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
