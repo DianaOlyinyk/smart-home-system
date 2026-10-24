@@ -70,16 +70,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Order(3)
-    public SecurityFilterChain fallbackFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error").permitAll()
-                        .anyRequest().denyAll())
-                .build();
-    }
-
-    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }

@@ -185,3 +185,43 @@
 | `400` | невалідне тіло або `requiredRole` не `OWNER`/`GUEST` |
 | `404` | пристрій не існує, або команда не належить цьому пристрою |
 | `409` | пристрій вже має команду з такою `name` |
+
+## 10. Сторінки (Thymeleaf)
+
+Спільний каркас: `templates/fragments/layout.html` (`layout(title, content)`: шапка з іменем користувача та виходом через POST, підвал) і `templates/fragments/plain.html` (`plain(title, content)`: без шапки й підвалу, для сторінки входу). Окремі CSS-файли для сторінок не створюються, усі сторінки використовують глобальний `static/css/app.css`. Посилання на файли пишуться через `th:href="@{...}"`, тоді до імені автоматично додається хеш вмісту. CSP забороняє inline-стилі та скрипти.
+
+Нова сторінка (`templates/<розділ>/<назва>.html`):
+
+```html
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Назва сторінки</title>
+</head>
+<body>
+    <main>
+        ...
+    </main>
+</body>
+</html>
+```
+
+`<!DOCTYPE html>` на початку сторінки обов'язковий: з лейаута він не передається. Для сторінки без шапки й підвалу замість `fragments/layout :: layout(` пишеться `fragments/plain :: plain(`.
+
+Готові класи з `app.css`:
+
+| Елемент | Класи |
+|---|---|
+| Кнопка (`<button>` або `<a>`) | `btn`, `btn-primary`, `btn-danger`, `btn-link`, `btn-sm` |
+| Заголовок сторінки з кнопкою | `page-header` |
+| Посилання «назад» | `back-link` |
+| Таблиця | `table-wrap` > `table`, `cell-actions` для комірки з діями |
+| Порожній список | `empty` |
+| Форма | `field` (label + input/select/textarea), `field-hint`, `field-error` з `has-error` на `field`, `form-actions` |
+| Картка, пари «назва: значення» | `card`, `details` (`dl`) |
+| Список | `list` > `list-item` (`list-item__title`) |
+| Повідомлення | `alert` з `alert-success`, `alert-error`, `alert-warning` або `alert-info` |
+| Бейдж | `badge`, `badge-owner`, `badge-guest`, `badge-success`, `badge-failed`, `badge-pending` |
+| Вхід | `card auth-card` |
+| Сторінка помилки | `error-page`, `error-page__code` |
+| Допоміжні | `muted`, `small` |
