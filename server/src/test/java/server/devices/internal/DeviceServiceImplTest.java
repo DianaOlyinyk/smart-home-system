@@ -9,6 +9,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import server.devices.AccessRole;
 import server.devices.Device;
 import server.devices.DeviceAccess;
+import server.devices.DeviceAccessRepository;
 import server.devices.DeviceNotFoundException;
 import server.devices.DeviceRepository;
 import server.devices.DeviceType;
@@ -42,13 +43,15 @@ class DeviceServiceImplTest {
 	@Mock
 	DeviceRepository deviceRepository;
 	@Mock
+	DeviceAccessRepository deviceAccessRepository;
+	@Mock
 	UserService userService;
 	DeviceServiceImpl deviceService;
 
 	@BeforeEach
 	void setUp() {
 		Clock clock = Clock.fixed(NOW, ZoneOffset.UTC);
-		deviceService = new DeviceServiceImpl(deviceRepository, userService, clock);
+		deviceService = new DeviceServiceImpl(deviceRepository, deviceAccessRepository, userService, clock);
 	}
 
 	@Test
@@ -114,6 +117,16 @@ class DeviceServiceImplTest {
 		when(deviceRepository.findById(deviceId)).thenReturn(Optional.empty());
 
 		assertThrows(DeviceNotFoundException.class, () -> deviceService.findById(deviceId));
+	}
+
+	@Test
+	void findsAccessRoleForUserAndDevice() {
+		UUID deviceId = UUID.randomUUID();
+		UUID userId = UUID.randomUUID();
+		when(deviceAccessRepository.findRoleByDeviceIdAndUserId(deviceId, userId))
+				.thenReturn(Optional.of(AccessRole.GUEST));
+
+		assertEquals(Optional.of(AccessRole.GUEST), deviceService.findAccessRole(deviceId, userId));
 	}
 
 	@Test

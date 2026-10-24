@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import server.devices.AccessRole;
 import server.devices.Device;
+import server.devices.DeviceAccessRepository;
 import server.devices.DeviceNotFoundException;
 import server.devices.DeviceRepository;
 import server.devices.DeviceService;
@@ -14,17 +15,24 @@ import server.users.UserService;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 class DeviceServiceImpl implements DeviceService {
 
     private final DeviceRepository deviceRepository;
+    private final DeviceAccessRepository deviceAccessRepository;
     private final UserService userService;
     private final Clock clock;
 
-    DeviceServiceImpl(DeviceRepository deviceRepository, UserService userService, Clock clock) {
+    DeviceServiceImpl(
+            DeviceRepository deviceRepository,
+            DeviceAccessRepository deviceAccessRepository,
+            UserService userService,
+            Clock clock) {
         this.deviceRepository = deviceRepository;
+        this.deviceAccessRepository = deviceAccessRepository;
         this.userService = userService;
         this.clock = clock;
     }
@@ -44,6 +52,12 @@ class DeviceServiceImpl implements DeviceService {
     @Override
     public Device findById(UUID id) {
         return deviceRepository.findById(id).orElseThrow(() -> new DeviceNotFoundException(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<AccessRole> findAccessRole(UUID deviceId, UUID userId) {
+        return deviceAccessRepository.findRoleByDeviceIdAndUserId(deviceId, userId);
     }
 
     @Override
