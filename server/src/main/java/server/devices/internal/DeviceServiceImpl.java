@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import server.devices.AccessRole;
 import server.devices.Device;
+import server.devices.UserDevice;
+import server.devices.DeviceAccessRepository;
 import server.devices.DeviceNotFoundException;
 import server.devices.DeviceRepository;
 import server.devices.DeviceService;
@@ -14,6 +16,7 @@ import server.users.UserService;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -22,9 +25,13 @@ class DeviceServiceImpl implements DeviceService {
     private final DeviceRepository deviceRepository;
     private final UserService userService;
     private final Clock clock;
+    private final DeviceAccessRepository deviceAccessRepository;
 
-    DeviceServiceImpl(DeviceRepository deviceRepository, UserService userService, Clock clock) {
+    DeviceServiceImpl(DeviceRepository deviceRepository,
+                      DeviceAccessRepository deviceAccessRepository,
+                      UserService userService, Clock clock) {
         this.deviceRepository = deviceRepository;
+        this.deviceAccessRepository = deviceAccessRepository;
         this.userService = userService;
         this.clock = clock;
     }
@@ -72,5 +79,15 @@ class DeviceServiceImpl implements DeviceService {
     @Transactional
     public void delete(UUID id) {
         deviceRepository.delete(findById(id));
+    }
+
+    @Override
+    public List<UserDevice> findAllForUser(UUID userId) {
+        return deviceAccessRepository.findAllByUserIdWithDevice(userId).stream().map(i -> new UserDevice(i.getDevice(), i.getRole())).toList();
+    }
+
+    @Override
+    public Optional<AccessRole> findRole(UUID deviceId, UUID userId) {
+        return deviceAccessRepository.findAll().stream().filter(d -> d.getDevice().getId().equals(deviceId) && d.getUser().getId().equals(userId)).map(d -> d.getRole()).findFirst();
     }
 }
