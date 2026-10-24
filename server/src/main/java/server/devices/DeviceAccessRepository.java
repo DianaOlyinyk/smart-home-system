@@ -6,7 +6,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -18,9 +17,4 @@ public interface DeviceAccessRepository extends JpaRepository<DeviceAccess, UUID
     boolean existsByDeviceIdAndUser_Id(UUID deviceId, UUID userId);
 
     boolean existsByDeviceIdAndUser_IdAndRole(UUID deviceId, UUID userId, AccessRole role);
-
-    @Query("SELECT da.role FROM DeviceAccess da WHERE da.device.id = :deviceId AND da.user.id = :userId")
-    Optional<AccessRole> findRoleByDeviceIdAndUserId(
-            @Param("deviceId") UUID deviceId,
-            @Param("userId") UUID userId);
 }

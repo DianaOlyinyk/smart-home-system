@@ -60,7 +60,7 @@ class DevicePageControllerTest {
         User guest = user(UUID.randomUUID());
         when(userService.getUserByEmail(guest.getEmail())).thenReturn(guest);
         when(deviceService.findById(deviceId)).thenReturn(device(deviceId));
-        when(deviceService.findAccessRole(deviceId, guest.getId())).thenReturn(Optional.of(AccessRole.GUEST));
+        when(deviceService.findRole(deviceId, guest.getId())).thenReturn(Optional.of(AccessRole.GUEST));
         List<Command> commands = List.of(command(deviceId, "guest_command", RequiredRole.GUEST));
         when(commandService.findAllByDevice(deviceId, RequiredRole.GUEST))
                 .thenReturn(commands);
@@ -81,7 +81,7 @@ class DevicePageControllerTest {
         User owner = user(UUID.randomUUID());
         when(userService.getUserByEmail(owner.getEmail())).thenReturn(owner);
         when(deviceService.findById(deviceId)).thenReturn(device(deviceId));
-        when(deviceService.findAccessRole(deviceId, owner.getId())).thenReturn(Optional.of(AccessRole.OWNER));
+        when(deviceService.findRole(deviceId, owner.getId())).thenReturn(Optional.of(AccessRole.OWNER));
         List<Command> commands = List.of(command(deviceId, "owner_command", RequiredRole.OWNER));
         when(commandService.findAllByDevice(deviceId, null))
                 .thenReturn(commands);
@@ -111,7 +111,7 @@ class DevicePageControllerTest {
         User guest = user(UUID.randomUUID());
         when(userService.getUserByEmail(guest.getEmail())).thenReturn(guest);
         when(deviceService.findById(deviceId)).thenReturn(device(deviceId));
-        when(deviceService.findAccessRole(deviceId, guest.getId())).thenReturn(Optional.empty());
+        when(deviceService.findRole(deviceId, guest.getId())).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/devices/{id}", deviceId).principal(guest::getEmail))
                 .andExpect(status().isNotFound());

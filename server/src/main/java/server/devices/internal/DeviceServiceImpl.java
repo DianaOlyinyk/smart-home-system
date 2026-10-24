@@ -26,11 +26,9 @@ class DeviceServiceImpl implements DeviceService {
     private final UserService userService;
     private final Clock clock;
 
-    DeviceServiceImpl(
-            DeviceRepository deviceRepository,
-            DeviceAccessRepository deviceAccessRepository,
-            UserService userService,
-            Clock clock) {
+    DeviceServiceImpl(DeviceRepository deviceRepository,
+                      DeviceAccessRepository deviceAccessRepository,
+                      UserService userService, Clock clock) {
         this.deviceRepository = deviceRepository;
         this.deviceAccessRepository = deviceAccessRepository;
         this.userService = userService;
@@ -52,12 +50,6 @@ class DeviceServiceImpl implements DeviceService {
     @Override
     public Device findById(UUID id) {
         return deviceRepository.findById(id).orElseThrow(() -> new DeviceNotFoundException(id));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<AccessRole> findAccessRole(UUID deviceId, UUID userId) {
-        return deviceAccessRepository.findRoleByDeviceIdAndUserId(deviceId, userId);
     }
 
     @Override
@@ -86,5 +78,14 @@ class DeviceServiceImpl implements DeviceService {
     @Transactional
     public void delete(UUID id) {
         deviceRepository.delete(findById(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<AccessRole> findRole(UUID deviceId, UUID userId) {
+        return deviceAccessRepository.findAllByUserIdWithDevice(userId).stream()
+                .filter(access -> access.getDevice().getId().equals(deviceId))
+                .map(access -> access.getRole())
+                .findFirst();
     }
 }

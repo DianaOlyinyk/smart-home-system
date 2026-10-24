@@ -48,7 +48,7 @@ class DevicePageController {
             Model model) {
         Device device = deviceService.findById(id);
         User user = userService.getUserByEmail(principal.getName());
-        AccessRole accessRole = deviceService.findAccessRole(id, user.getId())
+        AccessRole accessRole = deviceService.findRole(id, user.getId())
                 .orElseThrow(() -> new DeviceNotFoundException(id));
         boolean isOwner = accessRole == AccessRole.OWNER;
 
