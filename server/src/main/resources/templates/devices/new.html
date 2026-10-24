@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Новий пристрій</title>
+</head>
+<body>
+    <main>
+        <a class="back-link" th:href="@{/devices}">← Мої пристрої</a>
+        <h1>Новий пристрій</h1>
+
+        <div class="card">
+            <form th:action="@{/devices}" th:object="${form}" method="post" novalidate>
+                <div class="field" th:classappend="${#fields.hasErrors('name')} ? 'has-error'">
+                    <label for="name">Назва</label>
+                    <input type="text" id="name" th:field="*{name}" maxlength="255">
+                    <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Вкажіть назву пристрою</div>
+                </div>
+
+                <div class="field" th:classappend="${#fields.hasErrors('type')} ? 'has-error'">
+                    <label for="type">Тип</label>
+                    <select id="type" th:field="*{type}">
+                        <option value="">Оберіть тип</option>
+                        <option th:each="type : ${types}" th:value="${type}" th:text="${type}">LAMP</option>
+                    </select>
+                    <div class="field-error" th:if="${#fields.hasErrors('type')}" th:errors="*{type}">Оберіть тип пристрою</div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Додати</button>
+                    <a class="btn" th:href="@{/devices}">Скасувати</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>
