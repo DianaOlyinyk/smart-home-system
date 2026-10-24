@@ -69,6 +69,20 @@ class WebPagesTest {
                         .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 503))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(content().string(containsString(
-                        "Не вдалося виконати запит. Спробуйте ще раз пізніше.")));
+                        "Не вдалося виконати запит. Спробуйте ще раз пізніше.")))
+                .andExpect(content().string(containsString("error-page__code\">503<")));
+    }
+
+    @Test
+    void serverErrorPageShowsFiveHundredByDefault() throws Exception {
+        mockMvc.perform(get("/error")
+                        .accept(MediaType.TEXT_HTML)
+                        .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 500))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string(containsString("error-page__code\">500<")));
+
+        mockMvc.perform(get("/error").accept(MediaType.TEXT_HTML))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string(containsString("error-page__code\">500<")));
     }
 }
