@@ -14,6 +14,7 @@ import server.commands.Command;
 import server.commands.CommandService;
 import server.commands.RequiredRole;
 
+import server.ApiPaths;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +39,7 @@ public class CommandController {
             Command command = commandService.create(
             deviceId, request.name(), request.argsSchema(), request.requiredRole());
             return ResponseEntity
-                .created(URI.create("/devices/" + deviceId + "/commands/" + command.getId()))
+                .created(URI.create(ApiPaths.PREFIX + "/devices/" + deviceId + "/commands/" + command.getId()))
                 .body(CommandResponse.from(command));
     }
 

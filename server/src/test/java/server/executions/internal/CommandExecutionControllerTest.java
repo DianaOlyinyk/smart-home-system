@@ -79,7 +79,7 @@ class CommandExecutionControllerTest {
         when(commandExecutionService.execute(eq(deviceId), eq(commandId), eq(userId), anyMap()))
                 .thenReturn(execution(Map.of("brightness", 80), user()));
 
-        mockMvc.perform(post("/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
+        mockMvc.perform(post("/api/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
                         .header("X-User-Id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -88,7 +88,7 @@ class CommandExecutionControllerTest {
                                 }
                                 """))
                 .andExpect(status().isAccepted())
-                .andExpect(header().string("Location", "/devices/" + deviceId + "/executions/" + executionId))
+                .andExpect(header().string("Location", "/api/devices/" + deviceId + "/executions/" + executionId))
                 .andExpect(jsonPath("$.id").value(executionId.toString()))
                 .andExpect(jsonPath("$.deviceId").value(deviceId.toString()))
                 .andExpect(jsonPath("$.commandId").value(commandId.toString()))
@@ -104,7 +104,7 @@ class CommandExecutionControllerTest {
         when(commandExecutionService.execute(eq(deviceId), eq(commandId), isNull(), anyMap()))
                 .thenReturn(execution(Map.of(), null));
 
-        mockMvc.perform(post("/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
+        mockMvc.perform(post("/api/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -118,7 +118,7 @@ class CommandExecutionControllerTest {
 
     @Test
     void executeCommandReturns400WhenUserHeaderIsNotUuid() throws Exception {
-        mockMvc.perform(post("/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
+        mockMvc.perform(post("/api/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
                         .header("X-User-Id", "not-a-uuid")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -136,7 +136,7 @@ class CommandExecutionControllerTest {
         when(commandExecutionService.execute(eq(deviceId), eq(commandId), eq(userId), anyMap()))
                 .thenThrow(new CommandNotFoundException(deviceId, commandId));
 
-        mockMvc.perform(post("/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
+        mockMvc.perform(post("/api/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
                         .header("X-User-Id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -153,7 +153,7 @@ class CommandExecutionControllerTest {
 
     @Test
     void executeCommandReturns400WhenArgsFieldIsMissing() throws Exception {
-        mockMvc.perform(post("/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
+        mockMvc.perform(post("/api/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
@@ -161,7 +161,7 @@ class CommandExecutionControllerTest {
 
     @Test
     void unknownFieldInPayloadIsRejected() throws Exception {
-        mockMvc.perform(post("/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
+        mockMvc.perform(post("/api/devices/{deviceId}/commands/{commandId}/executions", deviceId, commandId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -177,7 +177,7 @@ class CommandExecutionControllerTest {
         when(commandExecutionService.findJournal(deviceId, null))
                 .thenReturn(List.of(execution(Map.of("brightness", 80), user())));
 
-        mockMvc.perform(get("/devices/{deviceId}/executions", deviceId))
+        mockMvc.perform(get("/api/devices/{deviceId}/executions", deviceId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(executionId.toString()))
@@ -189,7 +189,7 @@ class CommandExecutionControllerTest {
     void journalFiltersByUser() throws Exception {
         when(commandExecutionService.findJournal(deviceId, userId)).thenReturn(List.of());
 
-        mockMvc.perform(get("/devices/{deviceId}/executions", deviceId).param("userId", userId.toString()))
+        mockMvc.perform(get("/api/devices/{deviceId}/executions", deviceId).param("userId", userId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
 
@@ -200,7 +200,7 @@ class CommandExecutionControllerTest {
     void journalReturns404WhenDeviceNotFound() throws Exception {
         when(commandExecutionService.findJournal(deviceId, null)).thenThrow(new DeviceNotFoundException(deviceId));
 
-        mockMvc.perform(get("/devices/{deviceId}/executions", deviceId))
+        mockMvc.perform(get("/api/devices/{deviceId}/executions", deviceId))
                 .andExpect(status().isNotFound());
     }
 
@@ -208,7 +208,7 @@ class CommandExecutionControllerTest {
     void getByIdReturnsExecution() throws Exception {
         when(commandExecutionService.findById(deviceId, executionId)).thenReturn(execution(Map.of(), user()));
 
-        mockMvc.perform(get("/devices/{deviceId}/executions/{executionId}", deviceId, executionId))
+        mockMvc.perform(get("/api/devices/{deviceId}/executions/{executionId}", deviceId, executionId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(executionId.toString()))
                 .andExpect(jsonPath("$.status").value("PENDING"));
@@ -219,7 +219,7 @@ class CommandExecutionControllerTest {
         when(commandExecutionService.findById(deviceId, executionId))
                 .thenThrow(new CommandExecutionNotFoundException(executionId));
 
-        mockMvc.perform(get("/devices/{deviceId}/executions/{executionId}", deviceId, executionId))
+        mockMvc.perform(get("/api/devices/{deviceId}/executions/{executionId}", deviceId, executionId))
                 .andExpect(status().isNotFound());
     }
 
@@ -229,7 +229,7 @@ class CommandExecutionControllerTest {
         execution.transitionTo(ExecutionStatus.RUNNING).transitionTo(ExecutionStatus.TIMEOUT);
         when(commandExecutionService.changeStatus(deviceId, executionId, ExecutionStatus.TIMEOUT)).thenReturn(execution);
 
-        mockMvc.perform(patch("/devices/{deviceId}/executions/{executionId}", deviceId, executionId)
+        mockMvc.perform(patch("/api/devices/{deviceId}/executions/{executionId}", deviceId, executionId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 { "status": "TIMEOUT" }
@@ -244,7 +244,7 @@ class CommandExecutionControllerTest {
         when(commandExecutionService.changeStatus(deviceId, executionId, ExecutionStatus.RUNNING))
                 .thenThrow(new InvalidStateTransitionException(ExecutionStatus.SUCCESS, ExecutionStatus.RUNNING));
 
-        mockMvc.perform(patch("/devices/{deviceId}/executions/{executionId}", deviceId, executionId)
+        mockMvc.perform(patch("/api/devices/{deviceId}/executions/{executionId}", deviceId, executionId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 { "status": "RUNNING" }
@@ -254,7 +254,7 @@ class CommandExecutionControllerTest {
 
     @Test
     void changeStatusReturns400WhenStatusIsMissing() throws Exception {
-        mockMvc.perform(patch("/devices/{deviceId}/executions/{executionId}", deviceId, executionId)
+        mockMvc.perform(patch("/api/devices/{deviceId}/executions/{executionId}", deviceId, executionId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
@@ -264,7 +264,7 @@ class CommandExecutionControllerTest {
 
     @Test
     void changeStatusReturns400WhenStatusIsUnknown() throws Exception {
-        mockMvc.perform(patch("/devices/{deviceId}/executions/{executionId}", deviceId, executionId)
+        mockMvc.perform(patch("/api/devices/{deviceId}/executions/{executionId}", deviceId, executionId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 { "status": "DONE" }
@@ -277,7 +277,7 @@ class CommandExecutionControllerTest {
         when(commandExecutionService.changeStatus(deviceId, executionId, ExecutionStatus.TIMEOUT))
                 .thenThrow(new CommandExecutionNotFoundException(executionId));
 
-        mockMvc.perform(patch("/devices/{deviceId}/executions/{executionId}", deviceId, executionId)
+        mockMvc.perform(patch("/api/devices/{deviceId}/executions/{executionId}", deviceId, executionId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 { "status": "TIMEOUT" }
@@ -287,7 +287,7 @@ class CommandExecutionControllerTest {
 
     @Test
     void deleteReturns204() throws Exception {
-        mockMvc.perform(delete("/devices/{deviceId}/executions/{executionId}", deviceId, executionId))
+        mockMvc.perform(delete("/api/devices/{deviceId}/executions/{executionId}", deviceId, executionId))
                 .andExpect(status().isNoContent());
 
         verify(commandExecutionService).delete(deviceId, executionId);
@@ -298,7 +298,7 @@ class CommandExecutionControllerTest {
         doThrow(new CommandExecutionNotFoundException(executionId))
                 .when(commandExecutionService).delete(deviceId, executionId);
 
-        mockMvc.perform(delete("/devices/{deviceId}/executions/{executionId}", deviceId, executionId))
+        mockMvc.perform(delete("/api/devices/{deviceId}/executions/{executionId}", deviceId, executionId))
                 .andExpect(status().isNotFound());
     }
 }

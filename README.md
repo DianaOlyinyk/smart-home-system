@@ -170,13 +170,15 @@
 
 ## 9. REST API
 
+Усі REST-шляхи мають префікс `/api` (наприклад, `POST /api/login`, `GET /api/devices`). Автентифікація: заголовок `Authorization: Bearer <JWT>`; токен видає `POST /api/login`. Swagger UI (`/swagger-ui.html`), `/v3/api-docs` та H2-консоль префікса не мають і доступні без токена.
+
 ### Команди
 | Метод | Шлях | Тіло | Відповідь |
 |---|---|---|---|
-| `POST` | `/devices/{deviceId}/commands` | `{"name", "argsSchema", "requiredRole"}` | `201` + команда, заголовок `Location` |
-| `GET` | `/devices/{deviceId}/commands?requiredRole=` | — | `200` + список, відсортований за `name`; `requiredRole` необов'язковий |
-| `PUT` | `/devices/{deviceId}/commands/{commandId}` | `{"argsSchema", "requiredRole"}` | `204` |
-| `DELETE` | `/devices/{deviceId}/commands/{commandId}` | — | `204` |
+| `POST` | `/api/devices/{deviceId}/commands` | `{"name", "argsSchema", "requiredRole"}` | `201` + команда, заголовок `Location` |
+| `GET` | `/api/devices/{deviceId}/commands?requiredRole=` | — | `200` + список, відсортований за `name`; `requiredRole` необов'язковий |
+| `PUT` | `/api/devices/{deviceId}/commands/{commandId}` | `{"argsSchema", "requiredRole"}` | `204` |
+| `DELETE` | `/api/devices/{deviceId}/commands/{commandId}` | — | `204` |
 
 | Код | Коли |
 |---|---|

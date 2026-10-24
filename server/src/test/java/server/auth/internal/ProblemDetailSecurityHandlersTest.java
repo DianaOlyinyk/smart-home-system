@@ -31,7 +31,7 @@ class ProblemDetailSecurityHandlersTest {
 
     @Test
     void authenticationFailureWritesTopLevelProblemDetails() throws IOException, ServletException {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/devices");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/devices");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         authenticationEntryPoint.commence(request, response, new BadCredentialsException("Authentication required"));
@@ -42,7 +42,7 @@ class ProblemDetailSecurityHandlersTest {
 
     @Test
     void accessDeniedWritesTopLevelProblemDetails() throws IOException, ServletException {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/devices");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/devices");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         accessDeniedHandler.handle(request, response, new AccessDeniedException("Access is denied"));
@@ -67,7 +67,7 @@ class ProblemDetailSecurityHandlersTest {
         assertEquals(status, body.get("status").asInt());
         assertEquals(title, body.get("title").asString());
         assertEquals(detail, body.get("detail").asString());
-        assertEquals("/devices", body.get("path").asString());
+        assertEquals("/api/devices", body.get("path").asString());
         Instant.parse(body.get("timestamp").asString());
     }
 }

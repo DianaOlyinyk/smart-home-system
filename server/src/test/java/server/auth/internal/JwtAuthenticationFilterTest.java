@@ -48,7 +48,7 @@ class JwtAuthenticationFilterTest {
     @Test
     void corsConfigurationAllowsOnlyTheConfiguredOriginAndHeaders() {
         CorsConfigurationSource source = new CorsConfig().corsConfigurationSource();
-        CorsConfiguration configuration = source.getCorsConfiguration(new MockHttpServletRequest("OPTIONS", "/devices"));
+        CorsConfiguration configuration = source.getCorsConfiguration(new MockHttpServletRequest("OPTIONS", "/api/devices"));
 
         assertNotNull(configuration);
         assertEquals(java.util.List.of("http://localhost:3000"), configuration.getAllowedOrigins());
@@ -61,7 +61,7 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void requestWithoutBearerTokenPassesThroughUnchanged() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/devices");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/devices");
         MockHttpServletResponse response = new MockHttpServletResponse();
         JwtAuthenticationFilter filter =
                 new JwtAuthenticationFilter(jwtValidatorService, userDetailsService, authenticationEntryPoint);
@@ -74,7 +74,7 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void requestWithAnotherAuthorizationSchemePassesThroughUnchanged() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/devices");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/devices");
         request.addHeader("Authorization", "Basic credentials");
         MockHttpServletResponse response = new MockHttpServletResponse();
         JwtAuthenticationFilter filter =
@@ -88,7 +88,7 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void validBearerTokenAuthenticatesTheLoadedUser() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/devices");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/devices");
         request.addHeader("Authorization", "Bearer token");
         MockHttpServletResponse response = new MockHttpServletResponse();
         UserDetails userDetails = User.withUsername("alice@example.com")
@@ -110,7 +110,7 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void invalidBearerTokenClearsContextAndCommencesAuthenticationFailure() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/devices");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/devices");
         request.addHeader("Authorization", "Bearer invalid");
         MockHttpServletResponse response = new MockHttpServletResponse();
         when(jwtValidatorService.extractUsername("invalid")).thenThrow(new JwtException("Невалідний токен"));

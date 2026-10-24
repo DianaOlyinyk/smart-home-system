@@ -23,6 +23,7 @@ import server.devices.Device;
 import server.devices.DeviceService;
 import server.devices.DeviceType;
 
+import server.ApiPaths;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -47,7 +48,7 @@ class DeviceController {
             @Parameter(description = "Тимчасова ідентифікація користувача (UUID) до впровадження Security; необов'язковий", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6") @RequestHeader(name = "X-User-Id", required = false) UUID userId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Назва й тип нового пристрою") @Valid @RequestBody CreateDeviceRequest request) {
         Device device = deviceService.create(request.name(), request.type(), userId);
-        return ResponseEntity.created(URI.create("/devices/" + device.getId()))
+        return ResponseEntity.created(URI.create(ApiPaths.PREFIX + "/devices/" + device.getId()))
                 .body(DeviceResponse.from(device));
     }
 
