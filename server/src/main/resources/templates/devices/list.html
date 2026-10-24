@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Мої пристрої</title>
+</head>
+<body>
+    <main>
+        <div class="page-header">
+            <h1>Мої пристрої</h1>
+            <a class="btn btn-primary" th:href="@{/devices/new}">Додати пристрій</a>
+        </div>
+
+        <div class="alert alert-success" th:if="${success}" th:text="${success}">Пристрій додано</div>
+
+        <div class="empty" th:if="${devices.isEmpty()}">
+            <p>У вас ще немає пристроїв.</p>
+            <a class="btn btn-primary" th:href="@{/devices/new}">Додати пристрій</a>
+        </div>
+
+        <div class="table-wrap" th:unless="${devices.isEmpty()}">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Назва</th>
+                        <th>Тип</th>
+                        <th>Моя роль</th>
+                        <th>Додано</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="userDevice : ${devices}">
+                        <td th:text="${userDevice.device().name}">Лампа</td>
+                        <td th:text="${userDevice.device().type}">LAMP</td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${userDevice.accessRole().name() == 'OWNER'} ? 'badge-owner' : 'badge-guest'"
+                                  th:text="${userDevice.accessRole()}">OWNER</span>
+                        </td>
+                        <td th:text="${#temporals.format(userDevice.device().createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2026 00:00</td>
+                        <td class="cell-actions">
+                            <a class="btn btn-sm" th:href="@{/devices/{id}(id=${userDevice.device().id})}">Деталі</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

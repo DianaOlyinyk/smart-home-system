@@ -8,9 +8,10 @@ public interface DeviceService {
 
     Device create(String name, DeviceType type, UUID ownerId);
     Device findById(UUID id);
-    Optional<AccessRole> findRole(UUID deviceId, UUID userId);
     List<Device> findAll(DeviceType type);
     Device getWithAccesses(UUID id);
     Device rename(UUID id, String name);
     void delete(UUID id);
+    List<UserDevice> findAllForUser(UUID userId);
+    Optional<AccessRole> findRole(UUID deviceId, UUID userId);
 }

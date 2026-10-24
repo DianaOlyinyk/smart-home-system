@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import server.devices.AccessRole;
 import server.devices.Device;
+import server.devices.UserDevice;
 import server.devices.DeviceAccessRepository;
 import server.devices.DeviceNotFoundException;
 import server.devices.DeviceRepository;
@@ -22,9 +23,9 @@ import java.util.UUID;
 class DeviceServiceImpl implements DeviceService {
 
     private final DeviceRepository deviceRepository;
-    private final DeviceAccessRepository deviceAccessRepository;
     private final UserService userService;
     private final Clock clock;
+    private final DeviceAccessRepository deviceAccessRepository;
 
     DeviceServiceImpl(DeviceRepository deviceRepository,
                       DeviceAccessRepository deviceAccessRepository,
@@ -78,6 +79,11 @@ class DeviceServiceImpl implements DeviceService {
     @Transactional
     public void delete(UUID id) {
         deviceRepository.delete(findById(id));
+    }
+
+    @Override
+    public List<UserDevice> findAllForUser(UUID userId) {
+        return deviceAccessRepository.findAllByUserIdWithDevice(userId).stream().map(i -> new UserDevice(i.getDevice(), i.getRole())).toList();
     }
 
     @Override

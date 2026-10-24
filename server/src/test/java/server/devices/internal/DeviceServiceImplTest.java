@@ -13,6 +13,7 @@ import server.devices.DeviceAccessRepository;
 import server.devices.DeviceNotFoundException;
 import server.devices.DeviceRepository;
 import server.devices.DeviceType;
+import server.devices.UserDevice;
 import server.users.User;
 import server.users.UserNotFoundException;
 import server.users.UserService;
@@ -30,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -207,6 +209,82 @@ class DeviceServiceImplTest {
 		assertThrows(DeviceNotFoundException.class, () -> deviceService.delete(deviceId));
 
 		verify(deviceRepository, never()).delete(any());
+	}
+
+	@Test
+	void findAllForUserReturnsEmptyListForUserWithoutDevices() {
+		User owner = userWithId(UUID.randomUUID());
+		Device lamp = deviceWithId("Lamp", DeviceType.LAMP);
+		givenAccesses(List.of(new DeviceAccess(lamp, owner, AccessRole.OWNER, owner, NOW)));
+
+		List<UserDevice> result = deviceService.findAllForUser(UUID.randomUUID());
+
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	void findAllForUserReturnsEachDeviceWithUsersRole() {
+		UUID userId = UUID.randomUUID();
+		User user = userWithId(userId);
+		User other = userWithId(UUID.randomUUID());
+		Device lamp = deviceWithId("Lamp", DeviceType.LAMP);
+		Device kettle = deviceWithId("Kettle", DeviceType.KETTLE);
+		Device othersLamp = deviceWithId("Other lamp", DeviceType.LAMP);
+		givenAccesses(List.of(
+				new DeviceAccess(lamp, user, AccessRole.OWNER, user, NOW),
+				new DeviceAccess(kettle, other, AccessRole.OWNER, other, NOW),
+				new DeviceAccess(kettle, user, AccessRole.GUEST, other, NOW),
+				new DeviceAccess(othersLamp, other, AccessRole.OWNER, other, NOW)));
+
+		// A separate UUID object with the same value, like the id that arrives with a request.
+		List<UserDevice> result = deviceService.findAllForUser(UUID.fromString(userId.toString()));
+
+		assertEquals(List.of(
+				new UserDevice(lamp, AccessRole.OWNER),
+				new UserDevice(kettle, AccessRole.GUEST)), result);
+	}
+
+	@Test
+	void findRoleReturnsUsersRoleOnDevice() {
+		UUID userId = UUID.randomUUID();
+		User user = userWithId(userId);
+		User owner = userWithId(UUID.randomUUID());
+		Device kettle = deviceWithId("Kettle", DeviceType.KETTLE);
+		givenAccesses(List.of(
+				new DeviceAccess(kettle, owner, AccessRole.OWNER, owner, NOW),
+				new DeviceAccess(kettle, user, AccessRole.GUEST, owner, NOW)));
+
+		// Separate UUID objects with the same values, like the ids that arrive with a request.
+		Optional<AccessRole> result = deviceService.findRole(
+				UUID.fromString(kettle.getId().toString()), UUID.fromString(userId.toString()));
+
+		assertEquals(Optional.of(AccessRole.GUEST), result);
+	}
+
+	@Test
+	void findRoleIsEmptyWhenUserHasNoAccess() {
+		User owner = userWithId(UUID.randomUUID());
+		Device kettle = deviceWithId("Kettle", DeviceType.KETTLE);
+		givenAccesses(List.of(new DeviceAccess(kettle, owner, AccessRole.OWNER, owner, NOW)));
+
+		Optional<AccessRole> result = deviceService.findRole(kettle.getId(), UUID.randomUUID());
+
+		assertEquals(Optional.empty(), result);
+	}
+
+	// Stubs both ways of loading accesses, so the tests don't depend on which one the service uses.
+	private void givenAccesses(List<DeviceAccess> accesses) {
+		lenient().when(deviceAccessRepository.findAll()).thenReturn(accesses);
+		lenient().when(deviceAccessRepository.findAllByUserIdWithDevice(any())).thenAnswer(invocation -> {
+			UUID userId = invocation.getArgument(0);
+			return accesses.stream().filter(access -> access.getUserId().equals(userId)).toList();
+		});
+	}
+
+	private static Device deviceWithId(String name, DeviceType type) {
+		Device device = new Device(name, type, "token", NOW);
+		ReflectionTestUtils.setField(device, "id", UUID.randomUUID());
+		return device;
 	}
 
 	private static User userWithId(UUID id) {
