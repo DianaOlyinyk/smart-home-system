@@ -87,6 +87,19 @@ class DeviceFormControllerTest {
     }
 
     @Test
+    void createWithTooLongNameShowsFormWithError() throws Exception {
+        mockMvc.perform(post("/devices").with(user(account(UUID.randomUUID()))).with(csrf())
+                        .param("name", "а".repeat(256))
+                        .param("type", "LAMP"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("devices/new"))
+                .andExpect(model().attributeHasFieldErrors("form", "name"))
+                .andExpect(content().string(containsString("Назва не може бути довшою за 255 символів")));
+
+        verify(deviceService, never()).create(any(), any(), any());
+    }
+
+    @Test
     void createWithoutTypeShowsFormWithErrorAndKeepsName() throws Exception {
         mockMvc.perform(post("/devices").with(user(account(UUID.randomUUID()))).with(csrf())
                         .param("name", "Лампа")
