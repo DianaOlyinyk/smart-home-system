@@ -1,6 +1,7 @@
 package server.devices;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface DeviceService {
@@ -11,4 +12,6 @@ public interface DeviceService {
     Device getWithAccesses(UUID id);
     Device rename(UUID id, String name);
     void delete(UUID id);
+    List<UserDevice> findAllForUser(UUID userId);
+    Optional<AccessRole> findRole(UUID deviceId, UUID userId);
 }
