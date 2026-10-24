@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Помилка сервера — Smart Home</title>
+</head>
+<body>
+    <main class="error-page">
+        <p class="error-page__code"
+           th:text="${status != null and status ge 500 and status lt 600} ? ${status} : 500">500</p>
+        <h1>Помилка сервера</h1>
+        <p>Не вдалося виконати запит. Спробуйте ще раз пізніше.</p>
+        <a class="btn" th:href="@{/devices}">До пристроїв</a>
+    </main>
+</body>
+</html>

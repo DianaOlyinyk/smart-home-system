@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Сторінку не знайдено — Smart Home</title>
+</head>
+<body>
+    <main class="error-page">
+        <p class="error-page__code">404</p>
+        <h1>Сторінку не знайдено</h1>
+        <p>Сторінку або пристрій не знайдено.</p>
+        <a class="btn" th:href="@{/devices}">До пристроїв</a>
+    </main>
+</body>
+</html>
