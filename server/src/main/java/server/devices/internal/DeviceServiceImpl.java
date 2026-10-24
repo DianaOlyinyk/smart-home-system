@@ -88,6 +88,9 @@ class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Optional<AccessRole> findRole(UUID deviceId, UUID userId) {
-        return deviceAccessRepository.findAll().stream().filter(d -> d.getDevice().getId().equals(deviceId) && d.getUser().getId().equals(userId)).map(d -> d.getRole()).findFirst();
+        return deviceAccessRepository.findAllByUserIdWithDevice(userId).stream()
+                .filter(access -> access.getDevice().getId().equals(deviceId))
+                .map(access -> access.getRole())
+                .findFirst();
     }
 }
