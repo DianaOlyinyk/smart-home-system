@@ -31,6 +31,11 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
     testImplementation 'com.tngtech.archunit:archunit-junit5:1.5.0'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+    testImplementation 'org.springframework.boot:spring-boot-resttestclient'
+    testImplementation 'com.microsoft.playwright:playwright:1.57.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.springframework.modulith:spring-modulith-events-api'
     implementation project(':smarthome-spring-boot-starter')
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1'
