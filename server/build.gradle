@@ -55,6 +55,29 @@ tasks.withType(Test).configureEach {
     }
 }
 
-test {
+tasks.named('test') {
     useJUnitPlatform()
+    exclude '**/*E2EIT.class'
+}
+
+tasks.register('e2eTest', Test) {
+    description = 'Runs end-to-end tests (*E2EIT).'
+    group = 'verification'
+    useJUnitPlatform()
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    include '**/*E2EIT.class'
+    shouldRunAfter tasks.named('test')
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('e2eTest')
+}
+
+tasks.register('installPlaywright', JavaExec) {
+    description = 'Installs the Chromium browser for Playwright tests.'
+    group = 'verification'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.microsoft.playwright.CLI'
+    args 'install', '--with-deps', 'chromium'
 }
